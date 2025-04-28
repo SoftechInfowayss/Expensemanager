@@ -1,0 +1,79 @@
+.sidebar ul {
+    padding: 0;
+    margin-top: 20px;
+  }
+  
+  .sidebar li {
+    padding: 15px;
+  }
+  
+  .sidebar li a {
+    color: #b8c7ce;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+  }
+  
+  .sidebar li a:hover, .active-link {
+    color: #00d4ff;
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+  }
+  .sidebar {
+    width: 250px;
+    height: 100vh; /* Full height */
+    position: fixed; /* Fix to the side */
+    top: 0;
+    left: 0;
+    background-color:linear-gradient(135deg, #000428, #004e92);; /* Matches your theme */
+    color: #fff;
+    padding: 20px;
+    overflow-y: auto; /* Scrollable if content overflows */
+    z-index: 1000; /* Ensure it's above other elements */
+  }
+  
+  .content {
+    margin-left: 250px; /* Same as the sidebar width */
+    padding: 20px;
+    width: calc(100% - 250px); /* Full width minus sidebar */
+  }
+  .sidebar {
+  height: 100vh; /* Full height */
+  position: fixed; /* Fix to the side */
+  top: 0;
+  left: 0;
+  color: #fff;
+  overflow-y: auto; /* Scrollable if content overflows */
+  z-index: 1000; /* Ensure it's above other elements */
+  transition: width 0.3s ease;
+}
+
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+  color: #b8c7ce;
+  font-size: 16px;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.sidebar-link:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #00d4ff;
+}
+
+.active-link {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: #00d4ff;
+  font-weight: 600;
+}
+
+.sidebar-link span {
+  transition: opacity 0.3s ease;
+}

@@ -1,0 +1,231 @@
+/* Sidebar.css */
+.sidebar {
+    width: 250px;
+    height: calc(100vh - 72px); /* Height minus the navbar */
+    position: fixed;
+    top: 68.5px; /* Start exactly below the navbar */
+    left: 0;
+    background: linear-gradient(135deg, #1e293b, #0f172a); /* Match navbar gradient */
+    color: #fff;
+    padding: 20px; /* Remove extra padding-top, keep uniform padding */
+    overflow-y: auto;
+    z-index: 1000; /* Below navbar (z-1100) */
+    transition: transform 0.3s ease-in-out;
+    box-shadow: 2px 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .sidebar.translate-x-0 {
+    transform: translateX(0);
+  }
+  
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    color: #93c5fd;
+    font-size: 16px;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+  
+  .sidebar-link:hover {
+    background-color: rgba(147, 197, 253, 0.2);
+    color: #bfdbfe;
+    transform: translateX(5px);
+  }
+  
+  .active-link {
+    background-color: rgba(147, 197, 253, 0.3);
+    color: #bfdbfe;
+    font-weight: 600;
+    box-shadow: inset 3px 0 0 #93c5fd;
+  }
+  
+  /* Content adjustment */
+  .content {
+    margin-left: 0;
+    padding: 20px;
+    width: 100%;
+    background-color: #0f172a;
+    min-height: calc(100vh - 72px);
+  }
+  
+  /* Define d-flex if not using Bootstrap */
+  .d-flex {
+    display: flex;
+  }
+  
+  /* Media Queries */
+  @media (min-width: 768px) {
+    .sidebar {
+        transform: translateX(0) !important; /* Always visible on desktop */
+    }
+    .content {
+        margin-left: 250px;
+        width: calc(100% - 250px);
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .sidebar {
+        transform: translateX(-100%);
+    }
+    .sidebar.translate-x-0 {
+        transform: translateX(0);
+    }
+    .content {
+        margin-left: 0;
+        width: 100%;
+        padding-top: 20px;
+    }
+  }
+  @keyframes pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-pop-in {
+    animation: pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+  
+  @keyframes slide-in {
+    0% {
+      opacity: 0;
+      transform: translateX(-20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .animate-slide-in {
+    animation: slide-in 0.8s ease-out forwards;
+  }
+  @keyframes pop-in {
+    0% {
+      opacity: 0;
+      transform: scale(0.5);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  .animate-pop-in {
+    animation: pop-in 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+  }
+  
+  @keyframes progress {
+    0% {
+      width: 0%;
+    }
+    100% {
+      width: 100%;
+    }
+  }
+  
+  .animate-progress {
+    animation: progress 2.5s linear forwards;
+  }
+  
+  @keyframes slide-up {
+    0% {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-slide-up {
+    animation: slide-up 0.6s ease-out forwards;
+  }
+  
+  @keyframes float {
+    0% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+    100% {
+      transform: translateY(0px);
+    }
+  }
+  
+  .animate-float {
+    animation: float 4s ease-in-out infinite;
+  }
+  
+  @keyframes glow {
+    0% {
+      box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
+    }
+    50% {
+      box-shadow: 0 0 20px rgba(99, 102, 241, 0.8);
+    }
+    100% {
+      box-shadow: 0 0 5px rgba(99, 102, 241, 0.5);
+    }
+  }
+  
+  .animate-glow {
+    animation: glow 2s ease-in-out infinite;
+  }
+  
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fade-in 1s ease-out forwards;
+  }
