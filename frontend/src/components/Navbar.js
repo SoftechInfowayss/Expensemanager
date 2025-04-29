@@ -119,7 +119,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                             </motion.div>
 
                             {/* Admin Access Icon Button (To the right of Sign Up) */}
-                            <motion.button
+                            {/* <motion.button
                                 onClick={handleAdminAccess}
                                 className="text-gray-300 hover:text-blue-400 transition"
                                 whileHover={{ scale: 1.1 }}
@@ -127,7 +127,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                                 aria-label="Admin Access"
                             >
                                 <LucideShield size={24} />
-                            </motion.button>
+                            </motion.button> */}
                         </div>
                     )}
                 </div>
@@ -146,7 +146,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                         <NavItem to="/contact" title="Contact Us" icon={<LucideMail size={22} />} mobile />
 
                         {/* Admin Access Icon Button in Mobile Menu */}
-                        <motion.button
+                        {/* <motion.button
                             onClick={handleAdminAccess}
                             className="flex items-center justify-center w-full px-6 py-3 hover:bg-gray-800 transition"
                             whileHover={{ scale: 1.05 }}
@@ -154,7 +154,7 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
                             aria-label="Admin Access"
                         >
                             <LucideShield size={22} />
-                        </motion.button>
+                        </motion.button> */}
 
                         {user ? (
                             <>

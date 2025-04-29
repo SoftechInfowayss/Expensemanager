@@ -47,6 +47,16 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
                             Profile
                         </NavLink>
                     </li>
+                    <li className="mb-4">
+                        <NavLink
+                            to="/user/advice"
+                            className="sidebar-link"
+                            activeClassName="active-link"
+                            onClick={closeSidebar}
+                        >
+                           Finance Advice
+                        </NavLink>
+                    </li>
                 </ul>
             </div>
 
