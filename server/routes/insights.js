@@ -51,7 +51,7 @@ router.get('/advice', async (req, res) => {
       - Transaction details: ${JSON.stringify(transactionDetails)}
       Analyze the transaction names and amounts to identify spending patterns or frequent expenses.
       Suggest ways to save money, including a specific percentage reduction for the highest spending transaction or pattern.
-      Return ONLY a raw JSON object (do NOT wrap in markdown, code blocks like \`\`\`json, or extra text) with these exact fields: 
+      Return ONLY a raw JSON object (do NOT wrap in markdown, code blocks like \\\`json, or extra text) with these exact fields: 
       {
         "advice": "string", 
         "savingsGoal": "string", 
@@ -97,7 +97,7 @@ router.get('/advice', async (req, res) => {
       // If direct parse fails, try cleaning
       try {
         // Remove markdown code blocks if present
-        rawResponse = rawResponse.replace(/^```(json)?|```$/g, '').trim();
+        rawResponse = rawResponse.replace(/^(json)?|$/g, '').trim();
         
         // Fix common JSON issues
         // 1. Replace single quotes with double quotes

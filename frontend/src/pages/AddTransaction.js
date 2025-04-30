@@ -14,9 +14,9 @@ const AddTransactionPage = () => {
   const [name, setName] = useState("");
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("income");
+  const [date, setDate] = useState(new Date().toISOString().split("T")[0]); // ✅ Default to today's date
   const [isLoading, setIsLoading] = useState(true);
 
-  // Simulate loading effect
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 1000);
     return () => clearTimeout(timer);
@@ -30,25 +30,26 @@ const AddTransactionPage = () => {
       return;
     }
 
-    if (!name || !amount) {
+    if (!name || !amount || !date) {
       toast.error("All fields are required.");
       return;
     }
 
     try {
-      const response = await axios.post("https://expensebackend-production.up.railway.app/api/transactions", {
+      const response = await axios.post("http://localhost:5000/api/transactions/", {
         email,
         name,
         amount: parseFloat(amount),
         type,
+        date,
       });
 
       toast.success("Transaction added successfully!");
 
-      // Clear input fields
       setName("");
       setAmount("");
       setType("income");
+      setDate(new Date().toISOString().split("T")[0]); // Reset to today
     } catch (error) {
       console.error("Error adding transaction:", error);
       toast.error("Failed to add transaction.");
@@ -74,7 +75,6 @@ const AddTransactionPage = () => {
         transition={{ duration: 0.5, delay: 0.6 }}
         className="p-8"
       >
-        {/* Transaction Form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -108,7 +108,7 @@ const AddTransactionPage = () => {
           </div>
 
           {/* Transaction Type Selector */}
-          <div className="relative mb-6">
+          <div className="relative mb-4">
             <LucideArrowDownUp className="absolute top-3 left-3 text-gray-400" size={20} />
             <select
               value={type}
@@ -118,6 +118,16 @@ const AddTransactionPage = () => {
               <option value="income">Income</option>
               <option value="expense">Expense</option>
             </select>
+          </div>
+
+          {/* Date Input */}
+          <div className="relative mb-6">
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full p-3 bg-gray-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400 transition-all"
+            />
           </div>
 
           {/* Add Transaction Button */}
@@ -133,7 +143,6 @@ const AddTransactionPage = () => {
         </motion.div>
       </motion.div>
 
-      {/* Toast Messages */}
       <ToastContainer position="top-right" autoClose={3000} hideProgressBar closeOnClick draggable />
     </div>
   );

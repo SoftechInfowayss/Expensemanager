@@ -6,10 +6,11 @@ const router = express.Router();
 // ➤ Add Transaction (Income/Expense)
 router.post("/", async (req, res) => {
     try {
-        const { name, amount, type, email } = req.body;
+        const { name, amount, type, email, date } = req.body; // ✅ Added `date`
         if (!email) return res.status(400).json({ message: "Email is required" });
+        if (!date) return res.status(400).json({ message: "Date is required" });
 
-        const newTransaction = new Transaction({ name, amount, type, email });
+        const newTransaction = new Transaction({ name, amount, type, email, date }); // ✅ Pass `date`
         await newTransaction.save();
         res.status(201).json({ message: "Transaction added", transaction: newTransaction });
     } catch (error) {
@@ -20,7 +21,7 @@ router.post("/", async (req, res) => {
 // ➤ Get All Transactions for Logged-in User
 router.get("/", async (req, res) => {
     try {
-        const email = req.query.email;  // Get email from query params
+        const email = req.query.email;
         if (!email) return res.status(400).json({ message: "Email is required" });
 
         const transactions = await Transaction.find({ email }).sort({ date: -1 });
@@ -34,7 +35,7 @@ router.get("/", async (req, res) => {
 router.get("/:type", async (req, res) => {
     try {
         const { type } = req.params;
-        const email = req.query.email;  // Get email from query params
+        const email = req.query.email;
         if (!email) return res.status(400).json({ message: "Email is required" });
 
         if (!["income", "expense"].includes(type)) {
@@ -52,12 +53,13 @@ router.get("/:type", async (req, res) => {
 router.put("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const { name, amount, type, email } = req.body;
+        const { name, amount, type, email, date } = req.body; // ✅ Added `date`
         if (!email) return res.status(400).json({ message: "Email is required" });
+        if (!date) return res.status(400).json({ message: "Date is required" });
 
         const updatedTransaction = await Transaction.findOneAndUpdate(
-            { _id: id, email }, // Ensure the transaction belongs to the user
-            { name, amount, type },
+            { _id: id, email },
+            { name, amount, type, date }, // ✅ Include `date` in update
             { new: true }
         );
 
@@ -75,7 +77,7 @@ router.put("/:id", async (req, res) => {
 router.delete("/:id", async (req, res) => {
     try {
         const { id } = req.params;
-        const email = req.query.email;  // Get email from query params
+        const email = req.query.email;
         if (!email) return res.status(400).json({ message: "Email is required" });
 
         const deletedTransaction = await Transaction.findOneAndDelete({ _id: id, email });
@@ -89,6 +91,7 @@ router.delete("/:id", async (req, res) => {
         res.status(500).json({ message: "Server error", error });
     }
 });
+
 // ➤ Get Transactions Grouped by Month for Logged-in User
 router.get("/summary/monthly", async (req, res) => {
     try {
@@ -97,7 +100,6 @@ router.get("/summary/monthly", async (req, res) => {
 
         const transactions = await Transaction.find({ email }).sort({ date: -1 });
 
-        // Group transactions by Year-Month
         const monthlySummary = {};
 
         transactions.forEach((txn) => {
@@ -126,6 +128,5 @@ router.get("/summary/monthly", async (req, res) => {
         res.status(500).json({ message: "Server error", error });
     }
 });
-
 
 module.exports = router;
