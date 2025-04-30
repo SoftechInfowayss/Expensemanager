@@ -6,17 +6,42 @@ const router = express.Router();
 // ➤ Add Transaction (Income/Expense)
 router.post("/", async (req, res) => {
     try {
-        const { name, amount, type, email, date } = req.body; // ✅ Added `date`
+        const { name, amount, type, email, date } = req.body;
         if (!email) return res.status(400).json({ message: "Email is required" });
         if (!date) return res.status(400).json({ message: "Date is required" });
 
-        const newTransaction = new Transaction({ name, amount, type, email, date }); // ✅ Pass `date`
-        await newTransaction.save();
-        res.status(201).json({ message: "Transaction added", transaction: newTransaction });
+        const transactionDate = new Date(date);
+        const startOfMonth = new Date(transactionDate.getFullYear(), transactionDate.getMonth(), 1);
+        const endOfMonth = new Date(transactionDate.getFullYear(), transactionDate.getMonth() + 1, 0, 23, 59, 59);
+
+        // Find an existing transaction for same name, type, email, and same month
+        const existingTransaction = await Transaction.findOne({
+            email,
+            name,
+            type,
+            date: {
+                $gte: startOfMonth,
+                $lte: endOfMonth
+            }
+        });
+
+        if (existingTransaction) {
+            // Add to existing transaction amount
+            existingTransaction.amount += amount;
+            await existingTransaction.save();
+            return res.status(200).json({ message: "Transaction updated", transaction: existingTransaction });
+        } else {
+            // Create new transaction
+            const newTransaction = new Transaction({ name, amount, type, email, date });
+            await newTransaction.save();
+            return res.status(201).json({ message: "Transaction added", transaction: newTransaction });
+        }
+
     } catch (error) {
         res.status(500).json({ message: "Server error", error });
     }
 });
+
 
 // ➤ Get All Transactions for Logged-in User
 router.get("/", async (req, res) => {

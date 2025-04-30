@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { PieChart, Pie, Cell, Tooltip, BarChart, Bar, XAxis, YAxis, ResponsiveContainer } from "recharts";
 import axios from "axios";
+import { Trash2 } from "lucide-react";
 
 const Dashboard = () => {
   const [transactions, setTransactions] = useState([]);
@@ -11,7 +12,6 @@ const Dashboard = () => {
   const [monthlyData, setMonthlyData] = useState({});
   const [openMonth, setOpenMonth] = useState(null);
   const [searchQuery, setSearchQuery] = useState("");
-  // New state for advice feature
   const [showAdvice, setShowAdvice] = useState(false);
   const [advice, setAdvice] = useState(null);
   const [loadingAdvice, setLoadingAdvice] = useState(false);
@@ -37,7 +37,6 @@ const Dashboard = () => {
     fetchData();
   }, [email]);
 
-  // New function for fetching advice
   const getFinancialAdvice = async () => {
     setLoadingAdvice(true);
     try {
@@ -76,6 +75,20 @@ const Dashboard = () => {
     setBalance(totalIncome - totalExpense);
   };
 
+  const deleteTransaction = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/api/transactions/${id}?email=${email}`);
+      const res = await axios.get(`https://expensebackend-production.up.railway.app/api/transactions?email=${email}`);
+      setTransactions(res.data);
+      calculateStats(res.data);
+      const monthlyRes = await axios.get(`http://localhost:5000/api/transactions/summary/monthly?email=${email}`);
+      setMonthlyData(monthlyRes.data);
+    } catch (error) {
+      console.error("Error deleting transaction:", error);
+      alert("Failed to delete transaction");
+    }
+  };
+
   const pieData = [
     { name: "Income", value: income },
     { name: "Expenses", value: expenses },
@@ -101,7 +114,6 @@ const Dashboard = () => {
 
   return (
     <div className="p-6 bg-gray-900 min-h-screen text-white pt-24">
-      {/* Financial Advice Modal - New Addition */}
       <AnimatePresence>
         {showAdvice && (
           <motion.div 
@@ -161,7 +173,6 @@ const Dashboard = () => {
         )}
       </AnimatePresence>
 
-      {/* Original UI Below - Completely Unchanged */}
       <motion.h2 
         className="text-3xl font-bold text-center mb-6 text-blue-400"
         initial={{ opacity: 0, y: -50 }}
@@ -169,7 +180,6 @@ const Dashboard = () => {
         transition={{ duration: 1 }}
       >
         Dashboard
-        {/* Added small advice button next to title */}
         <button
           onClick={getFinancialAdvice}
           className="ml-4 bg-purple-600 hover:bg-purple-700 text-white px-3 py-1 rounded-lg text-sm font-normal transition"
@@ -247,9 +257,18 @@ const Dashboard = () => {
         />
         <div className="overflow-auto max-h-60">
           {filteredTransactions.map((t) => (
-            <div key={t._id} className="flex justify-between border-b border-gray-600 py-2">
+            <div key={t._id} className="flex justify-between items-center border-b border-gray-600 py-2">
               <span>{t.name}</span>
-              <span className={t.type === "income" ? "text-green-400" : "text-red-400"}>${t.amount}</span>
+              <div className="flex items-center">
+                <span className={t.type === "income" ? "text-green-400" : "text-red-400"}>${t.amount}</span>
+                <button
+                  onClick={() => deleteTransaction(t._id)}
+                  className="ml-4 text-red-500 hover:text-red-700"
+                  title="Delete transaction"
+                >
+                  <Trash2 className="h-5 w-5" />
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -280,9 +299,18 @@ const Dashboard = () => {
                       <p className="text-red-400">Expenses: ${data.expense}</p>
                       <div className="overflow-auto max-h-60 mt-4">
                         {data.transactions.map((txn) => (
-                          <div key={txn._id} className="flex justify-between border-b border-gray-600 py-2">
+                          <div key={txn._id} className="flex justify-between items-center border-b border-gray-600 py-2">
                             <span>{txn.name}</span>
-                            <span className={txn.type === "income" ? "text-green-400" : "text-red-400"}>${txn.amount}</span>
+                            <div className="flex items-center">
+                              <span className={txn.type === "income" ? "text-green-400" : "text-red-400"}>${txn.amount}</span>
+                              <button
+                                onClick={() => deleteTransaction(txn._id)}
+                                className="ml-4 text-red-500 hover:text-red-700"
+                                title="Delete transaction"
+                              >
+                                <Trash2 className="h-5 w-5" />
+                              </button>
+                            </div>
                           </div>
                         ))}
                       </div>
