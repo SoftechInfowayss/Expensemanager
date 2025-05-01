@@ -155,7 +155,7 @@ const Home = () => {
             transition={{ duration: 1, delay: 0.6 }}
           >
             <motion.a
-              href="#"
+              href="/signup"
               className="relative flex items-center justify-center bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 transition-all px-8 py-3.5 text-lg font-semibold rounded-lg shadow-xl overflow-hidden group border border-blue-500"
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
