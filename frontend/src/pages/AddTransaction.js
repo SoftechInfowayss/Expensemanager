@@ -57,13 +57,20 @@ const AddTransactionPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white pt-24">
+    <div className="min-h-screen bg-gray-900 text-white pt-24 relative overflow-hidden">
+      {/* Background Animation Layer */}
+      <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-blue-900/30 animate-gradient-bg"></div>
+      {/* Optional Subtle Particle Effect */}
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="w-full h-full bg-[radial-gradient(circle_at_center,rgba(59,130,246,0.2)_0%,transparent_70%)] opacity-50 animate-pulse-slow"></div>
+      </div>
+
       {/* Header */}
       <motion.header
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.4 }}
-        className="p-6 bg-gray-800 border-b border-gray-700"
+        className="p-6 bg-gray-800 border-b border-gray-700 relative z-10"
       >
         <h1 className="text-3xl font-bold text-blue-400">Add Transaction</h1>
       </motion.header>
@@ -73,7 +80,7 @@ const AddTransactionPage = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.6 }}
-        className="p-8"
+        className="p-8 relative z-10"
       >
         <motion.div
           initial={{ opacity: 0, y: 20 }}
