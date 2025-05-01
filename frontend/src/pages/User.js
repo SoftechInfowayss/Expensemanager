@@ -18,6 +18,7 @@ const User = ({ isSidebarOpen, toggleSidebar }) => {
                     <Route path="/profile" element={<Profile />} />
                     <Route path="/add-transaction" element={<AddTransaction />} />
                     <Route path="/advice" element={<FinancialAdvice />} />
+                    
                 </Routes>
             </div>
         </div>

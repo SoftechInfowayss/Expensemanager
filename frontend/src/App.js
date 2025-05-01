@@ -38,6 +38,7 @@ const App = () => {
                         path="/user/*"
                         element={<User isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}
                     />
+                    
                 </Routes>
             </Router>
         </AuthProvider>

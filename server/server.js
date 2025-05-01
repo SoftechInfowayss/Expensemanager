@@ -7,7 +7,7 @@ const cors = require('cors');
 const authRoutes = require('./routes/auth');
 const transactionRoutes = require('./routes/transactionroutes');
 const insightRoutes = require('./routes/insights');
-// const financeRoutes = require('./routes/airoute');
+const budgetRoutes = require('./routes/budgetsuggestion'); // ✅ Added new route
 
 const app = express();
 
@@ -28,7 +28,7 @@ mongoose
 app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/insights', insightRoutes);
-// app.use('/api/finance', financeRoutes); // Changed from '/api' to '/api/finance' for clarity
+app.use('/api/budget', budgetRoutes); // ✅ Route added here
 
 // Basic Error Handling Middleware
 app.use((err, req, res, next) => {

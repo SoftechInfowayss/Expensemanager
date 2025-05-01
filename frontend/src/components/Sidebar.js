@@ -90,6 +90,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
             { to: "/user/add-transaction", label: "Add Transaction", Icon: TransactionIcon },
             { to: "/user/profile", label: "Profile", Icon: ProfileIcon },
             { to: "/user/advice", label: "Finance Advice", Icon: AdviceIcon },
+           
           ].map((item, index) => (
             <motion.li
               key={item.to}
