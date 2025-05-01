@@ -1,14 +1,21 @@
 import { motion } from "framer-motion";
 import { FaCheckCircle, FaUserShield, FaChartPie, FaLock, FaRocket, FaMobileAlt, FaBell, FaHandsHelping, FaLightbulb, FaDollarSign, FaCogs, FaGlobe, FaHandshake, FaShieldAlt } from "react-icons/fa";
-import React from "react";
+import React, { useRef } from "react";
 import { LucideChevronDown, LucideChevronUp, LucideHelpCircle } from "lucide-react";
 import { useState } from "react";
 import Footer from "../components/Footer";
+import { Link } from "react-router-dom";
+
 const AboutUs = () => {
   const [openIndex, setOpenIndex] = useState(null);
+  const featuresRef = useRef(null);
 
   const toggleFAQ = (index) => {
       setOpenIndex(openIndex === index ? null : index);
+  };
+
+  const scrollToFeatures = () => {
+    featuresRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
   const faqs = [
@@ -64,8 +71,8 @@ const AboutUs = () => {
       </motion.p>
 
       {/* Call-to-Action Button with Smooth Hover Animation */}
-      <motion.a
-        href="#learn-more"
+      <motion.button
+        onClick={scrollToFeatures}
         whileHover={{
           scale: 1.12,
           boxShadow: "0px 0px 30px rgba(37, 99, 235, 0.9)",
@@ -75,7 +82,7 @@ const AboutUs = () => {
         className="mt-10 inline-block bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-400 px-10 py-4 text-lg font-semibold text-white rounded-full shadow-md hover:shadow-blue-600 transition-all duration-300"
       >
         Learn More 📖
-      </motion.a>
+      </motion.button>
 
       {/* Floating Gradient Orbs */}
       <div className="absolute top-14 left-20 w-10 h-10 bg-blue-400 rounded-full animate-pulse opacity-70"></div>
@@ -115,19 +122,22 @@ const AboutUs = () => {
 
           {/* Buttons */}
           <div className="mt-8 flex flex-wrap gap-4 justify-center lg:justify-start">
-            <motion.a 
-              whileHover={{ scale: 1.1 }}
-              className="bg-blue-500 px-8 py-3 rounded-md text-lg font-semibold shadow-lg hover:bg-blue-600 transition duration-300 cursor-pointer"
-            >
-              Get Started
-            </motion.a>
+            <Link to="/signup">
+              <motion.button 
+                whileHover={{ scale: 1.1 }}
+                className="bg-blue-500 px-8 py-3 rounded-md text-lg font-semibold shadow-lg hover:bg-blue-600 transition duration-300 cursor-pointer"
+              >
+                Get Started
+              </motion.button>
+            </Link>
 
-            <motion.a 
+            <motion.button 
+              onClick={scrollToFeatures}
               whileHover={{ scale: 1.1 }}
               className="bg-gray-900 px-8 py-3 rounded-md text-lg font-semibold text-blue-400 shadow-lg hover:bg-gray-800 transition duration-300 cursor-pointer"
             >
               Learn More
-            </motion.a>
+            </motion.button>
           </div>
         </motion.div>
 
@@ -148,60 +158,38 @@ const AboutUs = () => {
       </div>
     </section>
         <section className="relative bg-[#0B0F19] text-white py-20 px-6 lg:px-20 pt-24">
-            {/* Background Image for Hero Section */}
-            {/* <div className="absolute top-0 left-0 w-full h-[500px] bg-cover bg-center opacity-30" style={{ backgroundImage: "url('https://www.shutterstock.com/image-photo/quality-increase-cost-optimization-products-600nw-2332604711.jpg')"}}></div> */}
             <div className="max-w-7xl mx-auto relative z-10">
-                {/* Hero Section */}
-                {/* <div className="relative flex flex-col lg:flex-row items-center gap-12">
-                    <motion.div 
-                        initial={{ opacity: 0, x: -50 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ duration: 1 }}
-                        className="lg:w-1/2 text-center lg:text-left"
-                    >
-                        <h2 className="text-5xl font-bold text-blue-400 mb-6">About Expense Tracker</h2>
-                        <p className="text-gray-300 text-lg mb-6">
-                            Expense Tracker helps you track every transaction, set budgets, and gain financial insights effortlessly. Our secure and user-friendly platform ensures you stay in control.
-                        </p>
-                        <motion.button 
-                            whileHover={{ scale: 1.1 }}
-                            className="bg-blue-500 px-8 py-3 rounded-lg text-lg font-semibold text-white shadow-lg hover:bg-blue-600 transition duration-300"
-                        >
-                            Get Started
-                        </motion.button>
-                    </motion.div>
-                </div> */}
-
                 {/* Features Section */}
                 <motion.div 
-    initial={{ opacity: 0, y: 30 }}
-    animate={{ opacity: 1, y: 0 }}
-    transition={{ duration: 1.2, ease: "easeOut" }}
-    className="mt-20"
->
-    <h3 className="text-5xl font-extrabold text-center  bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-12">
-        Key Features
-    </h3>
+                    ref={featuresRef}
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: "easeOut" }}
+                    className="mt-20"
+                >
+                    <h3 className="text-5xl font-extrabold text-center  bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-12">
+                        Key Features
+                    </h3>
 
-    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 px-4">
-        {features.map((feature, index) => (
-            <motion.div 
-                key={index} 
-                whileHover={{ scale: 1.08, rotate: 1 }}
-                transition={{ type: "spring", stiffness: 200, damping: 10 }}
-                className="relative bg-gray-900 bg-opacity-80 backdrop-blur-lg p-6 rounded-xl shadow-xl border border-transparent hover:border-blue-500 transition-all duration-300 flex items-center gap-6 hover:shadow-2xl"
-            >
-                <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-md">
-                    {React.createElement(feature.icon, { className: "text-white text-4xl" })}
-                </div>
-                <div>
-                    <h4 className="text-2xl font-semibold text-white">{feature.title}</h4>
-                    <p className="text-gray-400 text-sm">{feature.description}</p>
-                </div>
-            </motion.div>
-        ))}
-    </div>
-</motion.div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-10 px-4">
+                        {features.map((feature, index) => (
+                            <motion.div 
+                                key={index} 
+                                whileHover={{ scale: 1.08, rotate: 1 }}
+                                transition={{ type: "spring", stiffness: 200, damping: 10 }}
+                                className="relative bg-gray-900 bg-opacity-80 backdrop-blur-lg p-6 rounded-xl shadow-xl border border-transparent hover:border-blue-500 transition-all duration-300 flex items-center gap-6 hover:shadow-2xl"
+                            >
+                                <div className="p-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 shadow-md">
+                                    {React.createElement(feature.icon, { className: "text-white text-4xl" })}
+                                </div>
+                                <div>
+                                    <h4 className="text-2xl font-semibold text-white">{feature.title}</h4>
+                                    <p className="text-gray-400 text-sm">{feature.description}</p>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </motion.div>
 
                 {/* Our Vision Section */}
                 <motion.div 
@@ -347,7 +335,7 @@ const features = [
 const helpPoints = [
     { title: "Smart Budgeting", description: "Optimize expenses with smart financial planning.", icon: FaLightbulb },
     { title: "Global Access", description: "Manage expenses from anywhere in the world.", icon: FaGlobe },
-    { title: "24/7 Support", description: "We’re here to assist you anytime.", icon: FaHandsHelping }
+    { title: "24/7 Support", description: "We're here to assist you anytime.", icon: FaHandsHelping }
 ];
 
 export default AboutUs;

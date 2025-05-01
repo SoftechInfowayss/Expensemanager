@@ -4,7 +4,7 @@ import { BarChart, Wallet, FileText, ShieldCheck, TrendingUp, Users } from "luci
 import { LucideArrowRight, LucideStar, LucideTrendingUp ,LucideWallet} from "lucide-react";
 import KeenSlider from "keen-slider";
 import { useEffect,useState } from "react";
-
+import { Link } from "react-router-dom";
 
 import TestimonialSlider from "../components/Testimonals";
 import Footer from "../components/Footer";
@@ -160,13 +160,14 @@ const Home = () => {
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.95 }}
             >
+              
               <span className="relative z-10 text-white drop-shadow-lg">Get Started</span>
               <LucideArrowRight size={20} className="ml-3 text-white" />
               <span className="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
             </motion.a>
 
             <motion.a
-              href="#"
+              href="/about"
               className="relative flex items-center justify-center border border-gray-600 px-8 py-3.5 text-lg font-semibold rounded-lg hover:bg-gray-800/50 transition-all overflow-hidden group"
               whileHover={{ scale: 1.08 }}
               whileTap={{ scale: 0.96 }}
@@ -335,6 +336,7 @@ const Home = () => {
           </div>
 
           {/* Sign Up Button with 3D Hover Effect */}
+          <Link to="/signup">
           <motion.button
             whileHover={{
               scale: 1.1,
@@ -344,7 +346,7 @@ const Home = () => {
             className="mt-6 bg-blue-500 px-8 py-3 rounded-lg text-lg font-semibold text-white shadow-lg hover:bg-blue-600 transition-all duration-300"
           >
             Get Started for Free
-          </motion.button>
+          </motion.button>  </Link>
         </div>
 
         {/* Right Side - Illustration with Zoom Animation */}
