@@ -1,271 +1,257 @@
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import React, { useState, useEffect } from 'react';
+import { Container, Typography, Card, CardContent, Grid, TextField, MenuItem, CircularProgress, List, ListItem, ListItemText, Divider, Box } from '@mui/material';
+import { styled } from '@mui/material/styles';
 
-const BudgetSuggestion = () => {
+const StyledContainer = styled(Container)(({ theme }) => ({
+  paddingTop: theme.spacing(4),
+  paddingBottom: theme.spacing(4),
+}));
+
+const StyledCard = styled(Card)(({ theme }) => ({
+  backgroundColor: '#0a1f3a',
+  color: '#ffffff',
+  borderRadius: '12px',
+  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
+  marginBottom: theme.spacing(3),
+}));
+
+const CategoryCard = styled(Card)(({ theme }) => ({
+  backgroundColor: '#1a3a6a',
+  color: '#ffffff',
+  borderRadius: '8px',
+  marginBottom: theme.spacing(2),
+  transition: 'transform 0.2s',
+  '&:hover': {
+    transform: 'translateY(-4px)',
+  },
+}));
+
+const BudgetSuggestionPage = () => {
   const [budgetData, setBudgetData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const email = localStorage.getItem("email");
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [year, setYear] = useState(new Date().getFullYear());
+  
+  const email = localStorage.getItem('email') || '';
 
   useEffect(() => {
-    if (!email) {
-      setError("Please log in to view budget suggestions.");
-      setLoading(false);
-      return;
-    }
-
-    const fetchBudgetSuggestions = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const response = await axios.get(
-          `http://localhost:5000/api/budget/suggestion?email=${email}`
-        );
-        setBudgetData(response.data);
-      } catch (error) {
-        console.error("Error fetching budget suggestions:", error);
-        setError("Failed to load budget suggestions. Please try again later.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchBudgetSuggestions();
-  }, [email]);
+  }, [month, year]);
 
-  // Simplified animation variants to prevent errors
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.1,
-        delayChildren: 0.3,
-      },
-    },
+  const fetchBudgetSuggestions = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/api/budget/suggestion?email=${encodeURIComponent(email)}&month=${month}&year=${year}`
+        
+      );
+      console.log(response)
+      if (!response.ok) {
+        throw new Error('Failed to fetch budget suggestions');
+        
+      }
+      const data = await response.json();
+      setBudgetData(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const itemVariants = {
-    hidden: { opacity: 0 },
-    visible: { opacity: 1 }
+  const handleMonthChange = (e) => {
+    setMonth(e.target.value);
   };
+
+  const handleYearChange = (e) => {
+    setYear(e.target.value);
+  };
+
+  const months = [
+    { value: 1, label: 'January' },
+    { value: 2, label: 'February' },
+    { value: 3, label: 'March' },
+    { value: 4, label: 'April' },
+    { value: 5, label: 'May' },
+    { value: 6, label: 'June' },
+    { value: 7, label: 'July' },
+    { value: 8, label: 'August' },
+    { value: 9, label: 'September' },
+    { value: 10, label: 'October' },
+    { value: 11, label: 'November' },
+    { value: 12, label: 'December' },
+  ];
+
+  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i - 5);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 text-white font-sans relative overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-[800px] h-[800px] bg-green-600/10 rounded-full filter blur-3xl animate-float top-[-300px] left-[-300px]"></div>
-        <div className="absolute w-[800px] h-[800px] bg-teal-600/10 rounded-full filter blur-3xl animate-float bottom-[-300px] right-[-300px]"></div>
-      </div>
+    <StyledContainer maxWidth="md">
+      <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#ffffff', fontWeight: 'bold', mb: 4 }}>
+        Budget Suggestions
+      </Typography>
+      
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            select
+            label="Month"
+            value={month}
+            onChange={handleMonthChange}
+            fullWidth
+            variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#3a5a8a',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#4a7aba',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#a0b3d0',
+              },
+              '& .MuiSelect-select': {
+                color: '#ffffff',
+              },
+            }}
+          >
+            {months.map((option) => (
+              <MenuItem key={option.value} value={option.value}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <TextField
+            select
+            label="Year"
+            value={year}
+            onChange={handleYearChange}
+            fullWidth
+            variant="outlined"
+            sx={{
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: '#3a5a8a',
+                },
+                '&:hover fieldset': {
+                  borderColor: '#4a7aba',
+                },
+              },
+              '& .MuiInputLabel-root': {
+                color: '#a0b3d0',
+              },
+              '& .MuiSelect-select': {
+                color: '#ffffff',
+              },
+            }}
+          >
+            {years.map((year) => (
+              <MenuItem key={year} value={year}>
+                {year}
+              </MenuItem>
+            ))}
+          </TextField>
+        </Grid>
+      </Grid>
 
-      {/* Header */}
-      <div className="relative pt-32 pb-20 text-center">
-        <motion.h1
-          className="text-5xl sm:text-6xl md:text-7xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-green-400 via-teal-400 to-emerald-400"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.9 }}
-        >
-          Budget Suggestions
-        </motion.h1>
-        <motion.p
-          className="mt-6 text-lg sm:text-xl md:text-2xl text-gray-200 max-w-3xl mx-auto leading-relaxed"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.3, duration: 0.7 }}
-        >
-          Smart budget recommendations based on your spending patterns
-        </motion.p>
-      </div>
+      {loading && (
+        <Box display="flex" justifyContent="center" my={4}>
+          <CircularProgress sx={{ color: '#4a7aba' }} />
+        </Box>
+      )}
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-        <motion.div
-          className="bg-gray-800/20 backdrop-blur-2xl p-8 sm:p-10 rounded-3xl shadow-2xl border border-gray-700/10"
-          initial="hidden"
-          animate="visible"
-          variants={containerVariants}
-        >
-          <AnimatePresence mode="wait">
-            {loading ? (
-              <motion.div
-                key="loading"
-                className="text-center py-24"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <div className="relative w-32 h-32 mx-auto">
-                  <div className="absolute inset-0 border-4 border-teal-500 border-t-transparent rounded-full animate-spin"></div>
-                  <div className="absolute inset-3 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin reverse"></div>
-                </div>
-                <p className="mt-8 text-xl sm:text-2xl text-gray-100 font-semibold">
-                  Analyzing your spending patterns...
-                </p>
-              </motion.div>
-            ) : error ? (
-              <motion.div
-                key="error"
-                className="text-center py-24"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <p className="text-red-400 text-xl sm:text-2xl font-semibold">
-                  {error}
-                </p>
-                <button
-                  onClick={() => window.location.reload()}
-                  className="mt-8 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white py-3 px-10 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:scale-105 active:scale-95"
-                >
-                  Try Again
-                </button>
-              </motion.div>
-            ) : budgetData ? (
-              <motion.div key="content" variants={containerVariants}>
-                <motion.div variants={itemVariants} className="mb-10">
-                  <h2 className="text-3xl sm:text-4xl font-bold text-teal-300 mb-4">
-                    Your Recommended Budget
-                  </h2>
-                  <p className="text-gray-200">
-                    {budgetData.summary || "Here's our suggested budget allocation based on your spending patterns."}
-                  </p>
-                  {budgetData.savingsTarget && (
-                    <div className="mt-4 p-4 bg-emerald-900/30 rounded-lg border border-emerald-700/50">
-                      <p className="text-emerald-300 font-medium">
-                        💰 Savings Target: {budgetData.savingsTarget}
-                      </p>
-                    </div>
-                  )}
-                </motion.div>
+      {error && (
+        <StyledCard>
+          <CardContent>
+            <Typography color="error">{error}</Typography>
+          </CardContent>
+        </StyledCard>
+      )}
 
-                {/* Budget Table - Using CSS animations instead of Framer Motion */}
-                <motion.div variants={itemVariants} className="mb-12">
-                  <div className="overflow-x-auto">
-                    <table className="w-full border-collapse">
-                      <thead>
-                        <tr className="bg-gray-700/50 text-left">
-                          <th className="p-4 rounded-tl-xl">Category</th>
-                          <th className="p-4">Recommended Amount</th>
-                          <th className="p-4">Suggestion</th>
-                          <th className="p-4 rounded-tr-xl">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {budgetData.recommendedBudget?.map((item, index) => (
-                          <tr
-                            key={index}
-                            className={`border-b border-gray-700/30 transition-all duration-300 ${
-                              index % 2 === 0 ? 'bg-gray-800/20' : 'bg-gray-800/10'
-                            } hover:bg-teal-900/10`}
-                            style={{
-                              animation: `fadeIn 0.5s ease-out ${index * 0.1}s forwards`,
-                              opacity: 0
-                            }}
-                          >
-                            <td className="p-4 font-medium text-teal-300">
+      {budgetData && !loading && (
+        <>
+          <StyledCard>
+            <CardContent>
+              <Typography variant="h6" gutterBottom sx={{ color: '#4a7aba', fontWeight: 'bold' }}>
+                Financial Summary for {months.find(m => m.value === month)?.label} {year}
+              </Typography>
+              <Typography paragraph sx={{ color: '#c0d3f0' }}>
+                {budgetData.summary}
+              </Typography>
+              <Typography sx={{ color: '#4a7aba', fontWeight: 'bold', mt: 2 }}>
+                {budgetData.savingsTarget}
+              </Typography>
+            </CardContent>
+          </StyledCard>
+
+          <Grid container spacing={3} sx={{ mt: 1 }}>
+            <Grid item xs={12} md={8}>
+              <StyledCard>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#4a7aba', fontWeight: 'bold' }}>
+                    Recommended Budget Allocation
+                  </Typography>
+                  {budgetData.recommendedBudget.map((item, index) => (
+                    <CategoryCard key={index}>
+                      <CardContent>
+                        <Grid container alignItems="center" spacing={2}>
+                          <Grid item xs={6}>
+                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
                               {item.category}
-                            </td>
-                            <td className="p-4">${item.amount}</td>
-                            <td className="p-4 text-gray-300">
-                              {item.suggestion || "No specific suggestion"}
-                            </td>
-                            <td className="p-4">
-                              <button className="text-sm bg-teal-600 hover:bg-teal-700 text-white py-1 px-3 rounded-lg transition-colors">
-                                Apply
-                              </button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </motion.div>
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={3}>
+                            <Typography variant="body1" align="right">
+                              {item.amount >= 0 ? `$${item.amount}%` : `-$${Math.abs(item.amount)}%`}
+                            </Typography>
+                          </Grid>
+                          <Grid item xs={12} sx={{ mt: 1 }}>
+                            <Typography variant="body2" sx={{ color: '#a0b3d0', fontStyle: 'italic' }}>
+                              {item.suggestion}
+                            </Typography>
+                          </Grid>
+                        </Grid>
+                      </CardContent>
+                    </CategoryCard>
+                  ))}
+                </CardContent>
+              </StyledCard>
+            </Grid>
 
-                {/* Summary and Actions */}
-                <motion.div
-                  variants={itemVariants}
-                  className="mt-8 flex flex-col sm:flex-row justify-between items-center gap-6"
-                >
-                  <div className="bg-gray-800/30 p-6 rounded-xl border border-gray-700/20 flex-1 w-full">
-                    <h3 className="text-xl font-semibold text-teal-300 mb-3">
-                      Key Takeaways
-                    </h3>
-                    <ul className="space-y-2">
-                      {budgetData.actionableAdvice?.map((advice, i) => (
-                        <li key={i} className="flex items-start">
-                          <span className="text-emerald-400 mr-2">•</span>
-                          <span>{advice}</span>
-                        </li>
-                      )) || (
-                        <li className="text-gray-400">
-                          Review your budget categories for optimization
-                        </li>
-                      )}
-                    </ul>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <button
-                      onClick={() => window.location.reload()}
-                      className="bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white py-3 px-8 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:scale-105 active:scale-95"
-                    >
-                      Regenerate Suggestions
-                    </button>
-                    <button
-                      className="bg-transparent border-2 border-teal-400 hover:bg-teal-400/10 text-teal-400 py-3 px-8 rounded-xl font-semibold transition-all duration-300 hover:scale-105 active:scale-95"
-                    >
-                      Save Budget
-                    </button>
-                  </div>
-                </motion.div>
-              </motion.div>
-            ) : (
-              <motion.div
-                key="no-data"
-                className="text-center py-24"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                transition={{ duration: 0.4 }}
-              >
-                <p className="text-gray-400 text-xl">
-                  No budget data available. Please try again later.
-                </p>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </motion.div>
-      </div>
-
-      {/* Custom CSS */}
-      <style jsx>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0) scale(1); opacity: 0.2; }
-          50% { transform: translateY(-20px) scale(1.1); opacity: 0.4; }
-        }
-        @keyframes fadeIn {
-          to { opacity: 1; }
-        }
-        @keyframes spin {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        .animate-float {
-          animation: float 10s ease-in-out infinite;
-        }
-        .animate-spin {
-          animation: spin 1s linear infinite;
-        }
-        .animate-spin.reverse {
-          animation-direction: reverse;
-        }
-      `}</style>
-    </div>
+            <Grid item xs={12} md={4}>
+              <StyledCard>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom sx={{ color: '#4a7aba', fontWeight: 'bold' }}>
+                    Actionable Advice
+                  </Typography>
+                  <List dense>
+                    {budgetData.actionableAdvice.map((advice, index) => (
+                      <React.Fragment key={index}>
+                        <ListItem>
+                          <ListItemText
+                            primary={advice}
+                            primaryTypographyProps={{ sx: { color: '#ffffff' } }}
+                          />
+                        </ListItem>
+                        {index < budgetData.actionableAdvice.length - 1 && (
+                          <Divider component="li" sx={{ backgroundColor: '#3a5a8a' }} />
+                        )}
+                      </React.Fragment>
+                    ))}
+                  </List>
+                </CardContent>
+              </StyledCard>
+            </Grid>
+          </Grid>
+        </>
+      )}
+    </StyledContainer>
   );
 };
 
-export default BudgetSuggestion;
+export default BudgetSuggestionPage;
