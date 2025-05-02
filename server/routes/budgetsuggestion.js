@@ -14,42 +14,78 @@ if (!process.env.GEMINI_API_KEY) {
 
 router.get('/suggestion', async (req, res) => {
   try {
-    const { email } = req.query;
+    const { email, month, year } = req.query;
+    
+    // Validate query parameters
     if (!email) return res.status(400).json({ error: 'Email query parameter is required' });
+    if (!month || !year) return res.status(400).json({ error: 'Month and year query parameters are required' });
+    
+    // Validate month and year format
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(year);
+    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
+      return res.status(400).json({ error: 'Month must be a number between 1 and 12' });
+    }
+    if (isNaN(yearNum) || yearNum < 2000 || yearNum > 9999) {
+      return res.status(400).json({ error: 'Year must be a valid four-digit number' });
+    }
 
-    const transactions = await Transaction.find({ email, type: 'expense' }).lean();
-    if (!transactions.length) return res.status(404).json({ error: 'No expense transactions found for this user' });
+    // Calculate date range for the specified month
+    const startDate = new Date(yearNum, monthNum - 1, 1);
+    const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
 
-    const categorized = {};
-    let total = 0;
+    // Fetch all transactions (income and expense) for the specified month
+    const transactions = await Transaction.find({
+      email,
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }).lean();
+
+    if (!transactions.length) {
+      return res.status(404).json({ error: `No transactions found for ${email} in ${month}/${year}` });
+    }
+
+    // Separate income and expenses
+    const categorizedExpenses = {};
+    let totalExpenses = 0;
+    let totalIncome = 0;
 
     // Process transactions
     for (let tx of transactions) {
       const cat = tx.name?.toLowerCase() || 'other';
       const amt = typeof tx.amount === 'number' ? tx.amount : 0;
       if (amt > 0) {
-        categorized[cat] = (categorized[cat] || 0) + amt;
-        total += amt;
+        if (tx.type === 'expense') {
+          categorizedExpenses[cat] = (categorizedExpenses[cat] || 0) + amt;
+          totalExpenses += amt;
+        } else if (tx.type === 'income') {
+          totalIncome += amt;
+        }
       }
     }
 
-    const breakdown = Object.entries(categorized).map(([category, amount]) => ({
+    // Calculate expense breakdown
+    const expenseBreakdown = Object.entries(categorizedExpenses).map(([category, amount]) => ({
       category,
       amount,
-      percentage: ((amount / total) * 100).toFixed(2)
+      percentage: totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(2) : 0
     }));
 
+    // Prepare the prompt with both income and expense data
     const prompt = `
-      Analyze this user's monthly expenses by category and suggest a budget allocation plan.
+      Analyze this user's financial data for ${month}/${year} and suggest a budget allocation plan for that month.
       Input:
-      - Total Spending: $${total.toFixed(2)}
-      - Breakdown by Category: ${JSON.stringify(breakdown, null, 2)}
+      - Total Income: $${totalIncome.toFixed(2)}
+      - Total Expenses: $${totalExpenses.toFixed(2)}
+      - Expense Breakdown by Category: ${JSON.stringify(expenseBreakdown, null, 2)}
       
       Instructions:
-      1. Analyze the spending patterns
-      2. Suggest a revised monthly budget allocation
+      1. Analyze the income and spending patterns for ${month}/${year}
+      2. Suggest a revised budget allocation for the specified month based on income and expenses
       3. Recommend areas for potential savings
-      4. Provide actionable advice
+      4. Provide actionable advice tailored to the month's financial data
       
       Required JSON Response Format:
       {
@@ -57,7 +93,7 @@ router.get('/suggestion', async (req, res) => {
           { "category": "Food", "amount": 300, "suggestion": "Reduce by 10%" },
           { "category": "Rent", "amount": 800, "suggestion": "Good amount" }
         ],
-        "summary": "Your spending analysis suggests...",
+        "summary": "Your financial analysis for ${month}/${year} suggests...",
         "savingsTarget": "Aim to save 20% of your income",
         "actionableAdvice": ["Reduce dining out", "Cancel unused subscriptions"]
       }
@@ -82,12 +118,12 @@ router.get('/suggestion', async (req, res) => {
       
       // Fix common JSON issues
       return jsonString
-        .replace(/'/g, '"') // Replace single quotes
-        .replace(/(\w+)\s*:/g, '"$1":') // Wrap unquoted keys
-        .replace(/:\s*([^"{}\[\],\s]+)(?=\s*[,}\]])/g, ': "$1"') // Wrap unquoted values
-        .replace(/,\s*([}\]])/g, '$1') // Remove trailing commas
-        .replace(/\\"/g, '"') // Fix escaped quotes
-        .replace(/\n/g, ' '); // Remove newlines
+        .replace(/'/g, '"')
+        .replace(/(\w+)\s*:/g, '"$1":')
+        .replace(/:\s*([^"{}\[\],\s]+)(?=\s*[,}\]])/g, ': "$1"')
+        .replace(/,\s*([}\]])/g, '$1')
+        .replace(/\\"/g, '"')
+        .replace(/\n/g, ' ');
     };
 
     try {
@@ -95,7 +131,7 @@ router.get('/suggestion', async (req, res) => {
       let budget = JSON.parse(rawResponse);
       
       // Validate response structure
-      const requiredFields = ['recommendedBudget', 'summary', 'savingsTarget'];
+      const requiredFields = ['recommendedBudget', 'summary', 'savingsTarget', 'actionableAdvice'];
       const missingFields = requiredFields.filter(field => !budget[field]);
       
       if (missingFields.length) {
@@ -111,7 +147,7 @@ router.get('/suggestion', async (req, res) => {
         const budget = JSON.parse(cleanedResponse);
         
         // Validate cleaned response
-        const requiredFields = ['recommendedBudget', 'summary', 'savingsTarget'];
+        const requiredFields = ['recommendedBudget', 'summary', 'savingsTarget', 'actionableAdvice'];
         const missingFields = requiredFields.filter(field => !budget[field]);
         
         if (missingFields.length) {
@@ -126,7 +162,7 @@ router.get('/suggestion', async (req, res) => {
         return res.status(500).json({
           error: 'Unable to parse Gemini response',
           details: finalError.message,
-          rawResponse: rawResponse.substring(0, 500) + '...' // Truncated for security
+          rawResponse: rawResponse.substring(0, 500) + '...'
         });
       }
     }
