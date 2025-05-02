@@ -5,7 +5,6 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   LucidePlusCircle,
-  LucideDollarSign,
   LucideWallet,
   LucideArrowDownUp,
 } from "lucide-react";
@@ -104,7 +103,7 @@ const AddTransactionPage = () => {
 
           {/* Amount Input */}
           <div className="relative mb-4">
-            <LucideDollarSign className="absolute top-3 left-3 text-gray-400" size={20} />
+            <span className="absolute top-3 left-3 text-gray-400" style={{ fontSize: '20px' }}>₹</span>
             <input
               type="number"
               placeholder="Amount"

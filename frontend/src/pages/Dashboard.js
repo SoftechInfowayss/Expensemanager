@@ -47,7 +47,7 @@ const Dashboard = () => {
       console.error("Error fetching financial advice:", error);
       setAdvice({
         advice: "Could not fetch financial advice at this time.",
-        savingsGoal: "$0",
+        savingsGoal: "₹0",
         focusArea: "N/A",
         reductionPercentage: 0
       });
@@ -153,7 +153,7 @@ const Dashboard = () => {
                     </div>
                     <div className="bg-gray-700 p-3 rounded-lg">
                       <p className="text-sm text-gray-400">Savings Goal</p>
-                      <p className="font-semibold text-green-400">{advice?.savingsGoal || "$0"}</p>
+                      <p className="font-semibold text-green-400">{advice?.savingsGoal || "₹0"}</p>
                     </div>
                     <div className="bg-gray-700 p-3 rounded-lg">
                       <p className="text-sm text-gray-400">Reduce By</p>
@@ -198,7 +198,7 @@ const Dashboard = () => {
           whileHover={{ scale: 1.05 }}
         >
           <h3 className="text-xl font-semibold text-green-400">Total Income</h3>
-          <p className="text-2xl font-bold">${income}</p>
+          <p className="text-2xl font-bold">₹{income}</p>
         </motion.div>
 
         <motion.div 
@@ -206,7 +206,7 @@ const Dashboard = () => {
           whileHover={{ scale: 1.05 }}
         >
           <h3 className="text-xl font-semibold text-red-400">Total Expenses</h3>
-          <p className="text-2xl font-bold">${expenses}</p>
+          <p className="text-2xl font-bold">₹{expenses}</p>
         </motion.div>
 
         <motion.div 
@@ -214,7 +214,7 @@ const Dashboard = () => {
           whileHover={{ scale: 1.05 }}
         >
           <h3 className="text-xl font-semibold text-blue-400">Balance</h3>
-          <p className="text-2xl font-bold">${balance}</p>
+          <p className="text-2xl font-bold">₹{balance}</p>
         </motion.div>
       </div>
 
@@ -234,7 +234,8 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-gray-800 p-6 rounded-lg shadow-md">
-          <h3 className="text-lg font-semibold mb-4">Transaction Overview ({currentMonth})</h3>
+          <h3 className="text-lg眦
+            font-semibold mb-4">Transaction Overview ({currentMonth})</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={barData}>
               <XAxis dataKey="name" stroke="#ccc" />
@@ -260,7 +261,7 @@ const Dashboard = () => {
             <div key={t._id} className="flex justify-between items-center border-b border-gray-600 py-2">
               <span>{t.name}</span>
               <div className="flex items-center">
-                <span className={t.type === "income" ? "text-green-400" : "text-red-400"}>${t.amount}</span>
+                <span className={t.type === "income" ? "text-green-400" : "text-red-400"}>₹{t.amount}</span>
                 <button
                   onClick={() => deleteTransaction(t._id)}
                   className="ml-4 text-red-500 hover:text-red-700"
@@ -295,14 +296,14 @@ const Dashboard = () => {
                 >
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <p className="text-green-400">Income: ${data.income}</p>
-                      <p className="text-red-400">Expenses: ${data.expense}</p>
+                      <p className="text-green-400">Income: ₹{data.income}</p>
+                      <p className="text-red-400">Expenses: ₹{data.expense}</p>
                       <div className="overflow-auto max-h-60 mt-4">
                         {data.transactions.map((txn) => (
                           <div key={txn._id} className="flex justify-between items-center border-b border-gray-600 py-2">
                             <span>{txn.name}</span>
                             <div className="flex items-center">
-                              <span className={txn.type === "income" ? "text-green-400" : "text-red-400"}>${txn.amount}</span>
+                              <span className={txn.type === "income" ? "text-green-400" : "text-red-400"}>₹{txn.amount}</span>
                               <button
                                 onClick={() => deleteTransaction(txn._id)}
                                 className="ml-4 text-red-500 hover:text-red-700"

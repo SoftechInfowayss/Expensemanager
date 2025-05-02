@@ -47,7 +47,7 @@ router.get('/advice', async (req, res) => {
     // Prompt for Gemini API
     const prompt = `
       Based on the following financial data, provide personalized financial advice as a raw JSON object:
-      - Total spent: $${totalSpent.toFixed(2)}
+      - Total spent: ₹${totalSpent.toFixed(2)}
       - Transaction details: ${JSON.stringify(transactionDetails)}
       Analyze the transaction names and amounts to identify spending patterns or frequent expenses.
       Suggest ways to save money, including a specific percentage reduction for the highest spending transaction or pattern.
@@ -61,7 +61,7 @@ router.get('/advice', async (req, res) => {
       Example: 
       {
         "advice": "Reduce Uber rides by 20%", 
-        "savingsGoal": "$10", 
+        "savingsGoal": "₹10", 
         "focusArea": "Uber rides", 
         "reductionPercentage": 20
       }
