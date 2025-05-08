@@ -23,7 +23,7 @@ const Dashboard = () => {
 
     const fetchData = async () => {
       try {
-        const res = await axios.get(`https://expensebackend-production.up.railway.app/api/transactions?email=${email}`);
+        const res = await axios.get(`http://localhost:5000/api/transactions?email=${email}`);
         setTransactions(res.data);
         calculateStats(res.data);
 
@@ -78,7 +78,7 @@ const Dashboard = () => {
   const deleteTransaction = async (id) => {
     try {
       await axios.delete(`http://localhost:5000/api/transactions/${id}?email=${email}`);
-      const res = await axios.get(`https://expensebackend-production.up.railway.app/api/transactions?email=${email}`);
+      const res = await axios.get(`http://localhost:5000/api/transactions?email=${email}`);
       setTransactions(res.data);
       calculateStats(res.data);
       const monthlyRes = await axios.get(`http://localhost:5000/api/transactions/summary/monthly?email=${email}`);

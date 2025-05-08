@@ -23,13 +23,14 @@ router.get('/suggestion', async (req, res) => {
     // Validate month and year format
     const monthNum = parseInt(month);
     const yearNum = parseInt(year);
-    if (isNaN(monthNum) || monthNum < 1 || monthNum > 12) {
-      return res.status(400).json({ error: 'Month must be a number between 1 and 12' });
-    }
-    if (isNaN(yearNum) || yearNum < 2000 || yearNum > 9999) {
-      return res.status(400).json({ error: 'Year must be a valid four-digit number' });
+    if (isNaN(monthNum)) return res.status(400).json({ error: 'Month must be a number' });
+    if (monthNum < 1 || monthNum > 12) return res.status(400).json({ error: 'Month must be between 1 and 12' });
+    if (isNaN(yearNum)) return res.status(400).json({ error: 'Year must be a number' });
+    if (yearNum < 2000 || yearNum > new Date().getFullYear() + 1) {
+      return res.status(400).json({ error: 'Year must be between 2000 and next year' });
     }
 
+    // Rest of your code remains the same...
     // Calculate date range for the specified month
     const startDate = new Date(yearNum, monthNum - 1, 1);
     const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
@@ -41,136 +42,186 @@ router.get('/suggestion', async (req, res) => {
         $gte: startDate,
         $lte: endDate
       }
-    }).lean();
+    }).sort({ date: 1 }).lean(); // Sort by date for better analysis
 
     if (!transactions.length) {
-      return res.status(404).json({ error: `No transactions found for ${email} in ${month}/${year}` });
+      return res.status(404).json({ 
+        error: `No transactions found for ${email} in ${month}/${year}`,
+        suggestion: 'Try a different month or add transactions first'
+      });
     }
-
-    // Separate income and expenses
-    const categorizedExpenses = {};
-    let totalExpenses = 0;
-    let totalIncome = 0;
 
     // Process transactions
-    for (let tx of transactions) {
-      const cat = tx.name?.toLowerCase() || 'other';
-      const amt = typeof tx.amount === 'number' ? tx.amount : 0;
-      if (amt > 0) {
-        if (tx.type === 'expense') {
-          categorizedExpenses[cat] = (categorizedExpenses[cat] || 0) + amt;
-          totalExpenses += amt;
-        } else if (tx.type === 'income') {
-          totalIncome += amt;
-        }
-      }
-    }
+    const categorizedExpenses = {};
+    const categorizedIncome = {};
+    let totalExpenses = 0;
+    let totalIncome = 0;
+    const allCategories = new Set();
 
-    // Calculate expense breakdown
+    transactions.forEach(tx => {
+      const category = tx.category?.toLowerCase() || tx.name?.toLowerCase() || 'other';
+      const amount = parseFloat(tx.amount) || 0;
+      
+      if (tx.type === 'expense' && amount > 0) {
+        categorizedExpenses[category] = (categorizedExpenses[category] || 0) + amount;
+        totalExpenses += amount;
+        allCategories.add(category);
+      } else if (tx.type === 'income' && amount > 0) {
+        categorizedIncome[category] = (categorizedIncome[category] || 0) + amount;
+        totalIncome += amount;
+      }
+    });
+
+    // Calculate expense breakdown with percentages
     const expenseBreakdown = Object.entries(categorizedExpenses).map(([category, amount]) => ({
       category,
       amount,
-      percentage: totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(2) : 0
+      percentage: totalExpenses > 0 ? ((amount / totalExpenses) * 100).toFixed(2) : '0.00'
     }));
 
-    // Prepare the prompt with both income and expense data
+    // Calculate income breakdown
+    const incomeBreakdown = Object.entries(categorizedIncome).map(([category, amount]) => ({
+      category,
+      amount,
+      percentage: totalIncome > 0 ? ((amount / totalIncome) * 100).toFixed(2) : '0.00'
+    }));
+
+    // Prepare the prompt with transaction context
     const prompt = `
-      Analyze this user's financial data for ${month}/${year} and suggest a budget allocation plan for that month.
-      Input:
+      Analyze this user's financial data for ${monthNum}/${yearNum} and provide specific, actionable budgeting advice ONLY for this month.
+
+      User's Financial Snapshot:
       - Total Income: $${totalIncome.toFixed(2)}
       - Total Expenses: $${totalExpenses.toFixed(2)}
-      - Expense Breakdown by Category: ${JSON.stringify(expenseBreakdown, null, 2)}
-      
-      Instructions:
-      1. Analyze the income and spending patterns for ${month}/${year}
-      2. Suggest a revised budget allocation for the specified month based on income and expenses
-      3. Recommend areas for potential savings
-      4. Provide actionable advice tailored to the month's financial data
-      
+      - Savings: $${(totalIncome - totalExpenses).toFixed(2)}
+      - Savings Rate: ${totalIncome > 0 ? (((totalIncome - totalExpenses) / totalIncome) * 100).toFixed(2) : '0.00'}%
+
+      Income Breakdown:
+      ${incomeBreakdown.map(i => `- ${i.category}: $${i.amount} (${i.percentage}%)`).join('\n')}
+
+      Expense Breakdown:
+      ${expenseBreakdown.map(e => `- ${e.category}: $${e.amount} (${e.percentage}%)`).join('\n')}
+
+      Specific Instructions:
+      1. Focus ONLY on the month ${monthNum}/${yearNum}
+      2. Analyze spending patterns in relation to income
+      3. Suggest specific budget adjustments ONLY for categories that appear in the expense breakdown
+      4. Provide concrete savings recommendations based on actual spending
+      5. Highlight any concerning spending patterns
+      6. Suggest realistic adjustments (don't recommend completely eliminating categories)
+
       Required JSON Response Format:
       {
-        "recommendedBudget": [
-          { "category": "Food", "amount": 300, "suggestion": "Reduce by 10%" },
-          { "category": "Rent", "amount": 800, "suggestion": "Good amount" }
+        "monthlySummary": {
+          "month": ${monthNum},
+          "year": ${yearNum},
+          "totalIncome": ${totalIncome},
+          "totalExpenses": ${totalExpenses},
+          "netSavings": ${totalIncome - totalExpenses}
+        },
+        "budgetRecommendations": [
+          {
+            "category": "category_name_from_transactions",
+            "currentSpending": 250,
+            "recommendedBudget": 200,
+            "suggestion": "Specific actionable advice for this category",
+            "adjustmentPercentage": -20
+          }
         ],
-        "summary": "Your financial analysis for ${month}/${year} suggests...",
-        "savingsTarget": "Aim to save 20% of your income",
-        "actionableAdvice": ["Reduce dining out", "Cancel unused subscriptions"]
+        "keyInsights": ["list of 3-5 key insights about this month's spending"],
+        "actionableAdvice": ["list of 3-5 specific actions for next month"],
+        "savingsOpportunities": ["list of potential savings opportunities"]
       }
-      
+
       Critical Requirements:
+      - Only recommend adjustments for categories that exist in the expense breakdown
+      - All numbers must be based on the provided data
       - Return ONLY valid JSON (no markdown, no code blocks)
       - Use double quotes for all properties and strings
       - No trailing commas
       - Escape special characters in strings
-      - Include all required fields
     `;
 
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent(prompt);
-    let rawResponse = result.response.text().trim();
-    console.log('Raw Gemini Response:', rawResponse);
+    const rawResponse = result.response.text().trim();
 
-    // Enhanced response parsing
-    const cleanJsonResponse = (jsonString) => {
-      // Remove any markdown code blocks
-      jsonString = jsonString.replace(/```(json)?/g, '');
-      
-      // Fix common JSON issues
-      return jsonString
-        .replace(/'/g, '"')
-        .replace(/(\w+)\s*:/g, '"$1":')
-        .replace(/:\s*([^"{}\[\],\s]+)(?=\s*[,}\]])/g, ': "$1"')
-        .replace(/,\s*([}\]])/g, '$1')
-        .replace(/\\"/g, '"')
-        .replace(/\n/g, ' ');
-    };
-
+    // Parse and validate the response
     try {
-      // First try parsing directly
-      let budget = JSON.parse(rawResponse);
+      // First clean the response
+      let jsonString = rawResponse.replace(/```json|```/g, '').trim();
       
-      // Validate response structure
-      const requiredFields = ['recommendedBudget', 'summary', 'savingsTarget', 'actionableAdvice'];
-      const missingFields = requiredFields.filter(field => !budget[field]);
+      // Parse the JSON
+      const budgetPlan = JSON.parse(jsonString);
       
-      if (missingFields.length) {
-        throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
+      // Validate the response structure
+      if (!budgetPlan.budgetRecommendations || !Array.isArray(budgetPlan.budgetRecommendations)) {
+        throw new Error('Invalid response format: missing budgetRecommendations array');
       }
       
-      return res.status(200).json(budget);
-    } catch (initialError) {
-      console.log('Initial parse failed, attempting cleaned parse...');
+      // Validate that all recommended categories exist in the original data
+      const invalidCategories = budgetPlan.budgetRecommendations.filter(rec => 
+        !categorizedExpenses[rec.category.toLowerCase()]
+      );
       
-      try {
-        const cleanedResponse = cleanJsonResponse(rawResponse);
-        const budget = JSON.parse(cleanedResponse);
-        
-        // Validate cleaned response
-        const requiredFields = ['recommendedBudget', 'summary', 'savingsTarget', 'actionableAdvice'];
-        const missingFields = requiredFields.filter(field => !budget[field]);
-        
-        if (missingFields.length) {
-          throw new Error(`Missing required fields after cleaning: ${missingFields.join(', ')}`);
-        }
-        
-        return res.status(200).json(budget);
-      } catch (finalError) {
-        console.error('Final parse error:', finalError.message);
-        console.error('Problematic response:', rawResponse);
-        
-        return res.status(500).json({
-          error: 'Unable to parse Gemini response',
-          details: finalError.message,
-          rawResponse: rawResponse.substring(0, 500) + '...'
-        });
+      if (invalidCategories.length > 0) {
+        console.warn('Gemini recommended categories not found in transactions:', invalidCategories);
+        // Filter out invalid categories
+        budgetPlan.budgetRecommendations = budgetPlan.budgetRecommendations.filter(rec => 
+          categorizedExpenses[rec.category.toLowerCase()]
+        );
       }
+      
+      // Add month/year context to the response
+      budgetPlan.monthContext = {
+        month: monthNum,
+        year: yearNum,
+        analyzedCategories: Array.from(allCategories)
+      };
+      
+      return res.status(200).json(budgetPlan);
+      
+    } catch (parseError) {
+      console.error('Failed to parse Gemini response:', parseError);
+      console.error('Problematic response:', rawResponse);
+      
+      // Fallback response if parsing fails
+      return res.status(200).json({
+        monthlySummary: {
+          month: monthNum,
+          year: yearNum,
+          totalIncome,
+          totalExpenses,
+          netSavings: totalIncome - totalExpenses
+        },
+        budgetRecommendations: expenseBreakdown.map(expense => ({
+          category: expense.category,
+          currentSpending: expense.amount,
+          recommendedBudget: expense.amount * 0.9, // Default 10% reduction
+          suggestion: 'Consider reducing this expense by 10% next month',
+          adjustmentPercentage: -10
+        })),
+        keyInsights: [
+          `Your total expenses were $${totalExpenses.toFixed(2)} against income of $${totalIncome.toFixed(2)}`,
+          `You spent ${((totalExpenses / totalIncome) * 100).toFixed(2)}% of your income`,
+          `Main expenses were: ${expenseBreakdown.slice(0, 3).map(e => e.category).join(', ')}`
+        ],
+        actionableAdvice: [
+          'Review your top 3 spending categories for potential reductions',
+          'Set specific budget limits for next month based on this month\'s spending',
+          'Consider tracking daily expenses to identify small savings opportunities'
+        ],
+        _warning: 'Default budget plan generated due to AI parsing issues',
+        _originalError: parseError.message
+      });
     }
+    
   } catch (error) {
-    console.error('Error generating budget suggestion:', error);
+    console.error('Error in budget suggestion endpoint:', error);
     res.status(500).json({
       error: 'Failed to generate budget suggestion',
-      details: error.message
+      details: error.message,
+      suggestion: 'Please try again with different parameters'
     });
   }
 });

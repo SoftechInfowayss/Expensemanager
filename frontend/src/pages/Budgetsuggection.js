@@ -1,257 +1,228 @@
 import React, { useState, useEffect } from 'react';
-import { Container, Typography, Card, CardContent, Grid, TextField, MenuItem, CircularProgress, List, ListItem, ListItemText, Divider, Box } from '@mui/material';
-import { styled } from '@mui/material/styles';
+import { FiPieChart, FiDollarSign, FiTrendingUp, FiCalendar } from 'react-icons/fi';
 
-const StyledContainer = styled(Container)(({ theme }) => ({
-  paddingTop: theme.spacing(4),
-  paddingBottom: theme.spacing(4),
-}));
-
-const StyledCard = styled(Card)(({ theme }) => ({
-  backgroundColor: '#0a1f3a',
-  color: '#ffffff',
-  borderRadius: '12px',
-  boxShadow: '0 8px 16px rgba(0, 0, 0, 0.2)',
-  marginBottom: theme.spacing(3),
-}));
-
-const CategoryCard = styled(Card)(({ theme }) => ({
-  backgroundColor: '#1a3a6a',
-  color: '#ffffff',
-  borderRadius: '8px',
-  marginBottom: theme.spacing(2),
-  transition: 'transform 0.2s',
-  '&:hover': {
-    transform: 'translateY(-4px)',
-  },
-}));
-
-const BudgetSuggestionPage = () => {
-  const [budgetData, setBudgetData] = useState(null);
-  const [loading, setLoading] = useState(false);
+const BudgetSuggestion = () => {
+  const [budgetData, setBudgetData] = useState({
+    monthlySummary: {
+      month: 0,
+      year: 0,
+      totalIncome: 0,
+      totalExpenses: 0,
+      netSavings: 0
+    },
+    budgetRecommendations: [],
+    keyInsights: [],
+    actionableAdvice: [],
+    savingsOpportunities: []
+  });
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [month, setMonth] = useState(new Date().getMonth() + 1);
   const [year, setYear] = useState(new Date().getFullYear());
-  
-  const email = localStorage.getItem('email') || '';
 
   useEffect(() => {
+    const fetchBudgetSuggestions = async () => {
+      try {
+        setLoading(true);
+        const email = localStorage.getItem('email') || 'taruna123@gmail.com';
+        const response = await fetch(
+          `http://localhost:5000/api/budget/suggestion?email=${email}&month=${month}&year=${year}`
+        );
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch budget suggestions');
+        }
+        
+        const data = await response.json();
+        const safeData = {
+          monthlySummary: data.monthlySummary || {
+            month: 0,
+            year: 0,
+            totalIncome: 0,
+            totalExpenses: 0,
+            netSavings: 0
+          },
+          budgetRecommendations: data.budgetRecommendations || [],
+          keyInsights: data.keyInsights || [],
+          actionableAdvice: data.actionableAdvice || [],
+          savingsOpportunities: data.savingsOpportunities || []
+        };
+        setBudgetData(safeData);
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchBudgetSuggestions();
   }, [month, year]);
 
-  const fetchBudgetSuggestions = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch(
-        `http://localhost:5000/api/budget/suggestion?email=${encodeURIComponent(email)}&month=${month}&year=${year}`
-        
-      );
-      console.log(response)
-      if (!response.ok) {
-        throw new Error('Failed to fetch budget suggestions');
-        
-      }
-      const data = await response.json();
-      setBudgetData(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const handleMonthChange = (e) => {
-    setMonth(e.target.value);
+    setMonth(parseInt(e.target.value));
   };
 
   const handleYearChange = (e) => {
-    setYear(e.target.value);
+    setYear(parseInt(e.target.value));
   };
 
-  const months = [
-    { value: 1, label: 'January' },
-    { value: 2, label: 'February' },
-    { value: 3, label: 'March' },
-    { value: 4, label: 'April' },
-    { value: 5, label: 'May' },
-    { value: 6, label: 'June' },
-    { value: 7, label: 'July' },
-    { value: 8, label: 'August' },
-    { value: 9, label: 'September' },
-    { value: 10, label: 'October' },
-    { value: 11, label: 'November' },
-    { value: 12, label: 'December' },
-  ];
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-[pulse_3s_cubic-bezier(0.4,0,0.6,1)_infinite] rounded-full h-12 w-12 border-t-4 border-b-4 border-blue-600"></div>
+      </div>
+    );
+  }
 
-  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() + i - 5);
+  if (error) {
+    return (
+      <div className="bg-red-950 border-l-4 border-red-500 text-red-100 p-6 m-8 rounded-xl animate-[fadeIn_0.5s_ease-out] max-w-4xl mx-auto">
+        <p className="font-bold text-lg">Error</p>
+        <p>{error}</p>
+      </div>
+    );
+  }
 
   return (
-    <StyledContainer maxWidth="md">
-      <Typography variant="h4" component="h1" gutterBottom sx={{ color: '#ffffff', fontWeight: 'bold', mb: 4 }}>
-        Budget Suggestions
-      </Typography>
-      
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            select
-            label="Month"
-            value={month}
-            onChange={handleMonthChange}
-            fullWidth
-            variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: '#3a5a8a',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#4a7aba',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#a0b3d0',
-              },
-              '& .MuiSelect-select': {
-                color: '#ffffff',
-              },
-            }}
-          >
-            {months.map((option) => (
-              <MenuItem key={option.value} value={option.value}>
-                {option.label}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-        <Grid item xs={12} sm={6}>
-          <TextField
-            select
-            label="Year"
+    <div className="min-h-screen p-8 bg-[#0f172a] top-24">
+      <div className="max-w-7xl mx-auto">
+        <h1 className="text-6xl font-extrabold text-white mb-16 animate-[slideUp_1s_cubic-bezier(0.4,0,0.2,1)] bg-clip-text text-transparent bg-gradient-to-r from-[#1e40af] via-[#3b82f6] to-[#7c3aed] text-center tracking-wide text-shadow-[0_0_10px_rgba(59,130,246,0.5)]">
+    Budget Suggestions
+  </h1>
+        
+        {/* Month/Year Selector */}
+        <div className="flex items-center gap-4 mb-10 animate-[fadeIn_0.5s_ease-out] justify-center">
+          <div className="flex items-center">
+            <FiCalendar className="text-white mr-2" />
+            <select 
+              value={month}
+              onChange={handleMonthChange}
+              className="border-none bg-[#334155] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#60a5fa] transition-all duration-300 hover:bg-[#475569]"
+            >
+              {Array.from({ length: 12 }, (_, i) => (
+                <option key={i + 1} value={i + 1} className="bg-[#334155]">
+                  {new Date(2000, i, 1).toLocaleString('default', { month: 'long' })}
+                </option>
+              ))}
+            </select>
+          </div>
+          <select 
             value={year}
             onChange={handleYearChange}
-            fullWidth
-            variant="outlined"
-            sx={{
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: '#3a5a8a',
-                },
-                '&:hover fieldset': {
-                  borderColor: '#4a7aba',
-                },
-              },
-              '& .MuiInputLabel-root': {
-                color: '#a0b3d0',
-              },
-              '& .MuiSelect-select': {
-                color: '#ffffff',
-              },
-            }}
+            className="border-none bg-[#334155] text-white rounded-lg px-4 py-2 focus:ring-2 focus:ring-[#60a5fa] transition-all duration-300 hover:bg-[#475569]"
           >
-            {years.map((year) => (
-              <MenuItem key={year} value={year}>
-                {year}
-              </MenuItem>
-            ))}
-          </TextField>
-        </Grid>
-      </Grid>
+            {Array.from({ length: 10 }, (_, i) => {
+              const yearOption = new Date().getFullYear() - 5 + i;
+              return (
+                <option key={yearOption} value={yearOption} className="bg-[#334155]">
+                  {yearOption}
+                </option>
+              );
+            })}
+          </select>
+        </div>
 
-      {loading && (
-        <Box display="flex" justifyContent="center" my={4}>
-          <CircularProgress sx={{ color: '#4a7aba' }} />
-        </Box>
-      )}
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+          {[
+            { title: 'Total Income', value: budgetData.monthlySummary.totalIncome, color: 'text-green-400' },
+            { title: 'Total Expenses', value: budgetData.monthlySummary.totalExpenses, color: 'text-red-400' },
+            { title: 'Balance', value: budgetData.monthlySummary.netSavings, color: 'text-[#3b82f6]' }
+          ].map((card, index) => (
+            <div
+              key={index}
+              className="bg-white bg-opacity-10 backdrop-blur-lg p-6 rounded-xl hover:scale-105 transition-transform duration-300 animate-[fadeIn_0.5s_ease-out]"
+            >
+              <h3 className="text-gray-300 text-sm font-medium">{card.title}</h3>
+              <p className={`text-2xl font-bold ${card.color}`}>
+                ₹{card.value?.toLocaleString() || '0'}
+              </p>
+            </div>
+          ))}
+        </div>
 
-      {error && (
-        <StyledCard>
-          <CardContent>
-            <Typography color="error">{error}</Typography>
-          </CardContent>
-        </StyledCard>
-      )}
+        {/* Budget Recommendations */}
+        <div className="bg-white bg-opacity-10 backdrop-blur-lg p-6 rounded-xl mb-10 hover:scale-[1.02] transition-transform duration-300 animate-[fadeIn_0.5s_ease-out]">
+          <h2 className="text-xl font-bold text-white mb-4">Budget Recommendations</h2>
+          <div className="space-y-4">
+            {budgetData.budgetRecommendations?.length > 0 ? (
+              budgetData.budgetRecommendations.map((item, index) => (
+                <div key={index} className="border-b border-[#1e3a8a] pb-4 last:border-b-0">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <h3 className="font-medium text-white capitalize">{item.category || 'Uncategorized'}</h3>
+                      <p className="text-sm text-gray-300">{item.suggestion || 'No suggestion provided'}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-400">Current: ₹{item.currentSpending || '0'}</p>
+                      <p className={`font-medium ${(item.adjustmentPercentage || 0) < 0 ? 'text-red-400' : 'text-green-400'}`}>
+                        Recommended: ₹{item.recommendedBudget || '0'} ({item.adjustmentPercentage || '0'}%)
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-400">No budget recommendations available</p>
+            )}
+          </div>
+        </div>
 
-      {budgetData && !loading && (
-        <>
-          <StyledCard>
-            <CardContent>
-              <Typography variant="h6" gutterBottom sx={{ color: '#4a7aba', fontWeight: 'bold' }}>
-                Financial Summary for {months.find(m => m.value === month)?.label} {year}
-              </Typography>
-              <Typography paragraph sx={{ color: '#c0d3f0' }}>
-                {budgetData.summary}
-              </Typography>
-              <Typography sx={{ color: '#4a7aba', fontWeight: 'bold', mt: 2 }}>
-                {budgetData.savingsTarget}
-              </Typography>
-            </CardContent>
-          </StyledCard>
+        {/* Insights and Advice */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg p-6 rounded-xl hover:scale-[1.02] transition-transform duration-300 animate-[fadeIn_0.5s_ease-out]">
+            <h2 className="text-xl font-bold text-white mb-4">Key Insights</h2>
+            <ul className="space-y-2">
+              {budgetData.keyInsights?.length > 0 ? (
+                budgetData.keyInsights.map((insight, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="inline-block w-2 h-2 bg-[#3b82f6] rounded-full mt-2 mr-2"></span>
+                    <span className="text-gray-200">{insight}</span>
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-400">No insights available</p>
+              )}
+            </ul>
+          </div>
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg p-6 rounded-xl hover:scale-[1.02] transition-transform duration-300 animate-[fadeIn_0.5s_ease-out]">
+            <h2 className="text-xl font-bold text-white mb-4">Actionable Advice</h2>
+            <ul className="space-y-2">
+              {budgetData.actionableAdvice?.length > 0 ? (
+                budgetData.actionableAdvice.map((advice, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="inline-block w-2 h-2 bg-green-400 rounded-full mt-2 mr-2"></span>
+                    <span className="text-gray-200">{advice}</span>
+                  </li>
+                ))
+              ) : (
+                <p className="text-gray-400">No advice available</p>
+              )}
+            </ul>
+          </div>
+        </div>
 
-          <Grid container spacing={3} sx={{ mt: 1 }}>
-            <Grid item xs={12} md={8}>
-              <StyledCard>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#4a7aba', fontWeight: 'bold' }}>
-                    Recommended Budget Allocation
-                  </Typography>
-                  {budgetData.recommendedBudget.map((item, index) => (
-                    <CategoryCard key={index}>
-                      <CardContent>
-                        <Grid container alignItems="center" spacing={2}>
-                          <Grid item xs={6}>
-                            <Typography variant="subtitle1" sx={{ fontWeight: 'bold' }}>
-                              {item.category}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={3}>
-                            <Typography variant="body1" align="right">
-                              {item.amount >= 0 ? `$${item.amount}%` : `-$${Math.abs(item.amount)}%`}
-                            </Typography>
-                          </Grid>
-                          <Grid item xs={12} sx={{ mt: 1 }}>
-                            <Typography variant="body2" sx={{ color: '#a0b3d0', fontStyle: 'italic' }}>
-                              {item.suggestion}
-                            </Typography>
-                          </Grid>
-                        </Grid>
-                      </CardContent>
-                    </CategoryCard>
-                  ))}
-                </CardContent>
-              </StyledCard>
-            </Grid>
-
-            <Grid item xs={12} md={4}>
-              <StyledCard>
-                <CardContent>
-                  <Typography variant="h6" gutterBottom sx={{ color: '#4a7aba', fontWeight: 'bold' }}>
-                    Actionable Advice
-                  </Typography>
-                  <List dense>
-                    {budgetData.actionableAdvice.map((advice, index) => (
-                      <React.Fragment key={index}>
-                        <ListItem>
-                          <ListItemText
-                            primary={advice}
-                            primaryTypographyProps={{ sx: { color: '#ffffff' } }}
-                          />
-                        </ListItem>
-                        {index < budgetData.actionableAdvice.length - 1 && (
-                          <Divider component="li" sx={{ backgroundColor: '#3a5a8a' }} />
-                        )}
-                      </React.Fragment>
-                    ))}
-                  </List>
-                </CardContent>
-              </StyledCard>
-            </Grid>
-          </Grid>
-        </>
-      )}
-    </StyledContainer>
+        {/* Savings Opportunities */}
+        <div className="bg-white bg-opacity-10 backdrop-blur-lg p-6 rounded-xl hover:scale-[1.02] transition-transform duration-300 animate-[fadeIn_0.5s_ease-out]">
+          <h2 className="text-xl font-bold text-white mb-4">Savings Opportunities</h2>
+          <div className="flex flex-wrap gap-2">
+            {budgetData.savingsOpportunities?.length > 0 ? (
+              budgetData.savingsOpportunities.map((opportunity, index) => (
+                <span 
+                  key={index} 
+                  className="bg-[#2563eb] text-white px-3 py-1 rounded-full text-sm hover:bg-[#3b82f6] transition-colors duration-300"
+                >
+                  {opportunity}
+                </span>
+              ))
+            ) : (
+              <p className="text-gray-400">No savings opportunities identified</p>
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
-export default BudgetSuggestionPage;
+export default BudgetSuggestion;
