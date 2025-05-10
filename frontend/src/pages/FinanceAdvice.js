@@ -50,16 +50,22 @@ const FinancialAdvice = () => {
   }, [month, year]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
+    <div className="min-h-screen bg-gray-900 text-gray-100 pt-20 pb-10 px-6"> {/* Added pt-20 for navbar spacing */}
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8 text-blue-400 animate-fade-in">
-          Financial Insights
-          <span className="text-blue-600 text-4xl ml-2">💡</span>
-        </h1>
+        <div className="text-center mb-12 animate-fade-in-down"> {/* Wrapped heading in a div with text-center */}
+          <h1 className="text-4xl font-bold mb-2 text-blue-400 inline-flex items-center gap-3">
+            <span className="animate-pulse">💡</span>
+            Financial Insights
+            <span className="animate-pulse">💡</span>
+          </h1>
+          <p className="text-gray-400 mt-2 animate-fade-in delay-100">
+            Get personalized financial advice based on your spending patterns
+          </p>
+        </div>
         
-        <div className="bg-gray-800 rounded-xl shadow-2xl p-6 mb-8 border border-gray-700 transform transition-all hover:scale-[1.005]">
+        <div className="bg-gray-800 rounded-xl shadow-2xl p-6 mb-8 border border-gray-700 transform transition-all hover:scale-[1.005] animate-float">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            <div>
+            <div className="animate-fade-in-right delay-75">
               <label className="block text-gray-300 mb-2 font-medium">Month</label>
               <select
                 value={month}
@@ -72,7 +78,7 @@ const FinancialAdvice = () => {
               </select>
             </div>
             
-            <div>
+            <div className="animate-fade-in-right delay-100">
               <label className="block text-gray-300 mb-2 font-medium">Year</label>
               <select
                 value={year}
@@ -89,7 +95,7 @@ const FinancialAdvice = () => {
           <button
             onClick={fetchAdvice}
             disabled={loading}
-            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/20"
+            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/20 animate-bounce delay-200"
           >
             {loading ? (
               <>
@@ -122,16 +128,16 @@ const FinancialAdvice = () => {
         )}
 
         {advice && (
-          <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-fade-in">
+          <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-fade-in-up">
             <h2 className="text-2xl font-semibold mb-4 text-blue-400 flex items-center gap-2">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
               Your Financial Report for {months.find(m => m.value === month)?.name} {year}
             </h2>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all hover:scale-[1.02] animate-fade-in-up delay-75">
                 <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
@@ -141,7 +147,7 @@ const FinancialAdvice = () => {
                 <p className="text-gray-200 leading-relaxed">{advice.advice}</p>
               </div>
               
-              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all hover:scale-[1.02] animate-fade-in-up delay-100">
                 <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
@@ -151,18 +157,18 @@ const FinancialAdvice = () => {
                 <p className="text-gray-200 leading-relaxed">{advice.focusArea}</p>
               </div>
               
-              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all hover:scale-[1.02] animate-fade-in-up delay-150">
                 <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
                   </svg>
                   Savings Goal
                 </h3>
-                <p className="text-2xl font-bold text-blue-300">{advice.savingsGoal}</p>
+                <p className="text-2xl font-bold text-blue-300 animate-pulse">{advice.savingsGoal}</p>
                 <p className="text-gray-400 text-sm mt-1">Potential monthly savings</p>
               </div>
               
-              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all hover:scale-[1.02] animate-fade-in-up delay-200">
                 <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
@@ -176,7 +182,7 @@ const FinancialAdvice = () => {
                       style={{ width: `${advice.reductionPercentage}%` }}
                     ></div>
                   </div>
-                  <span className="text-xl font-bold text-blue-300 whitespace-nowrap">
+                  <span className="text-xl font-bold text-blue-300 whitespace-nowrap animate-pulse">
                     {advice.reductionPercentage}%
                   </span>
                 </div>

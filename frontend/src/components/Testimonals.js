@@ -1,7 +1,6 @@
 import React, { useEffect } from 'react';
 import KeenSlider from 'keen-slider';
 import 'keen-slider/keen-slider.min.css';
-
 const TestimonialSlider = () => {
   useEffect(() => {
     const keenSlider = new KeenSlider(

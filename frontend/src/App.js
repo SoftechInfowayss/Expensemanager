@@ -12,6 +12,7 @@ import AddTransaction from "./pages/AddTransaction";
 import Profile from "./pages/Profile";
 import User from "./pages/User";
 import AdminLogin from "./pages/AdminLogin";
+import Figma from "./pages/Figma";
 
 const App = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -42,6 +43,7 @@ const App = () => {
                 </Routes>
             </Router>
         </AuthProvider>
+        
     );
 };
 
