@@ -1,220 +1,191 @@
-import { useEffect, useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
 const FinancialAdvice = () => {
+  // Get email from localStorage or use empty string as fallback
+  const [email] = useState(localStorage.getItem('email') || '');
+  const [month, setMonth] = useState(new Date().getMonth() + 1);
+  const [year, setYear] = useState(new Date().getFullYear());
   const [advice, setAdvice] = useState(null);
-  const [loadingAdvice, setLoadingAdvice] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const email = localStorage.getItem("email");
+
+  const months = [
+    { value: 1, name: 'January' },
+    { value: 2, name: 'February' },
+    { value: 3, name: 'March' },
+    { value: 4, name: 'April' },
+    { value: 5, name: 'May' },
+    { value: 6, name: 'June' },
+    { value: 7, name: 'July' },
+    { value: 8, name: 'August' },
+    { value: 9, name: 'September' },
+    { value: 10, name: 'October' },
+    { value: 11, name: 'November' },
+    { value: 12, name: 'December' }
+  ];
+
+  const years = Array.from({ length: 10 }, (_, i) => new Date().getFullYear() - i);
+
+  const fetchAdvice = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await axios.get('http://localhost:5000/api/insights/advice', {
+        params: { email, month, year }
+      });
+      setAdvice(response.data);
+    } catch (err) {
+      setError(err.response?.data?.error || 'Failed to fetch financial advice');
+      setAdvice(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    if (!email) {
-      setError("Please log in to view financial advice.");
-      setLoadingAdvice(false);
-      return;
+    if (email) {
+      fetchAdvice();
     }
-
-    const fetchAdvice = async () => {
-      setLoadingAdvice(true);
-      setError(null);
-      try {
-        const response = await axios.get(`http://localhost:5000/api/insights/advice?email=${email}`);
-        setAdvice(response.data);
-      } catch (error) {
-        console.error("Error fetching financial advice:", error);
-        setAdvice({
-          advice: "Could not fetch financial advice at this time.",
-          savingsGoal: "₹0",
-          focusArea: "N/A",
-          reductionPercentage: 0,
-        });
-        setError("Failed to load advice. Displaying default message.");
-      } finally {
-        setLoadingAdvice(false);
-      }
-    };
-
-    fetchAdvice();
-  }, [email]);
-
-  // Animation variants for staggered children
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: {
-        staggerChildren: 0.2,
-      },
-    },
-  };
-
-  const itemVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-  };
+  }, [month, year]);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white relative overflow-hidden">
-      {/* Subtle background animation */}
-      <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute w-96 h-96 bg-blue-500/10 rounded-full filter blur-3xl animate-pulse top-0 left-0"></div>
-        <div className="absolute w-96 h-96 bg-purple-500/10 rounded-full filter blur-3xl animate-pulse bottom-0 right-0"></div>
-      </div>
-
-      {/* Hero Section */}
-      <div className="relative pt-24 pb-12 bg-gradient-to-b from-gray-800 to-gray-900">
-        <motion.h1
-          className="text-4xl md:text-5xl font-extrabold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400"
-          initial={{ opacity: 0, y: -50 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 1 }}
-        >
-          Your Financial Insights
-        </motion.h1>
-        <motion.p
-          className="text-lg md:text-xl text-gray-300 text-center mt-4 max-w-2xl mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.5, duration: 0.8 }}
-        >
-          Discover personalized advice to optimize your financial journey.
-        </motion.p>
-      </div>
-
-      {/* Main Content */}
-      <div className="max-w-4xl mx-auto px-4 pb-12">
-        <motion.div
-          className="bg-gray-800/80 backdrop-blur-md p-8 rounded-xl shadow-2xl border border-gray-700/50"
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-        >
-          {loadingAdvice ? (
-            <motion.div
-              className="text-center py-16"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <div className="animate-spin rounded-full h-20 w-20 border-t-4 border-b-4 border-blue-500 mx-auto"></div>
-              <p className="mt-6 text-xl text-gray-300">Analyzing your financial patterns...</p>
-              <div className="mt-4 w-3/4 mx-auto h-2 bg-gray-700 rounded-full overflow-hidden">
-                <div className="h-full bg-blue-500 animate-[loading_2s_ease-in-out_infinite]"></div>
-              </div>
-            </motion.div>
-          ) : error && !advice ? (
-            <motion.div
-              className="text-center py-16"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.5 }}
-            >
-              <p className="text-red-400 text-xl">{error}</p>
-              <button
-                onClick={() => window.location.reload()}
-                className="mt-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-8 rounded-lg transition-all duration-300 shadow-lg"
+    <div className="min-h-screen bg-gray-900 text-gray-100 p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold mb-8 text-blue-400 animate-fade-in">
+          Financial Insights
+          <span className="text-blue-600 text-4xl ml-2">💡</span>
+        </h1>
+        
+        <div className="bg-gray-800 rounded-xl shadow-2xl p-6 mb-8 border border-gray-700 transform transition-all hover:scale-[1.005]">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            <div>
+              <label className="block text-gray-300 mb-2 font-medium">Month</label>
+              <select
+                value={month}
+                onChange={(e) => setMonth(parseInt(e.target.value))}
+                className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
-                Try Again
-              </button>
-            </motion.div>
-          ) : (
-            <motion.div variants={containerVariants}>
-              <motion.h2 variants={itemVariants} className="text-2xl font-semibold text-blue-300 mb-6">
-                Personalized Recommendations
-              </motion.h2>
-              <motion.p
-                variants={itemVariants}
-                className="text-lg text-gray-200 mb-8 leading-relaxed"
+                {months.map((m) => (
+                  <option key={m.value} value={m.value}>{m.name}</option>
+                ))}
+              </select>
+            </div>
+            
+            <div>
+              <label className="block text-gray-300 mb-2 font-medium">Year</label>
+              <select
+                value={year}
+                onChange={(e) => setYear(parseInt(e.target.value))}
+                className="w-full p-3 rounded-lg bg-gray-700 border border-gray-600 text-gray-100 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
-                {advice?.advice || "No advice available."}
-              </motion.p>
-              <motion.div
-                variants={containerVariants}
-                className="grid grid-cols-1 sm:grid-cols-3 gap-6"
-              >
-                <motion.div
-                  variants={itemVariants}
-                  className="bg-gray-700/50 backdrop-blur-sm p-6 rounded-lg text-center border border-gray-600/50"
-                  whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <p className="text-sm text-gray-400">Focus Area</p>
-                  <p className="font-semibold text-xl text-blue-300 mt-2">{advice?.focusArea || "N/A"}</p>
-                </motion.div>
-                <motion.div
-                  variants={itemVariants}
-                  className="bg-gray-700/50 backdrop-blur-sm p-6 rounded-lg text-center border border-gray-600/50"
-                  whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <p className="text-sm text-gray-400">Savings Goal</p>
-                  <p className="font-semibold text-xl text-green-400 mt-2">{advice?.savingsGoal || "₹0"}</p>
-                </motion.div>
-                <motion.div
-                  variants={itemVariants}
-                  className="bg-gray-700/50 backdrop-blur-sm p-6 rounded-lg text-center border border_GRAY-600/50"
-                  whileHover={{ scale: 1.05, boxShadow: "0 10px 20px rgba(0, 0, 0, 0.3)" }}
-                  transition={{ type: "spring", stiffness: 300 }}
-                >
-                  <p className="text-sm text-gray-400">Reduce Spending By</p>
-                  <p className="font-semibold text-xl text-red-400 mt-2">{advice?.reductionPercentage || 0}%</p>
-                </motion.div>
-              </motion.div>
-              <motion.div
-                variants={itemVariants}
-                className="mt-10 flex justify-center"
-              >
-                <button
-                  onClick={() => window.location.reload()}
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white py-3 px-8 rounded-lg transition-all duration-300 shadow-lg"
-                >
-                  Refresh Advice
-                </button>
-              </motion.div>
-            </motion.div>
-          )}
-        </motion.div>
-
-        {/* Call to Action */}
-        <motion.div
-          className="mt-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-        >
-          <p className="text-gray-300 text-lg">
-            Explore more financial tools and insights on your{" "}
-            <a href="/user/" className="text-blue-400 hover:underline font-semibold">
-              Dashboard
-            </a>
-            .
-          </p>
-          <div className="mt-6 flex justify-center gap-4">
-            <a
-              href="/user/"
-              className="bg-gray-700 hover:bg-gray-600 text-white py-2 px-6 rounded-lg transition-all duration-300"
-            >
-              View Dashboard
-            </a>
-            <a
-              href="/transactions"
-              className="bg-transparent border border-blue-400 hover:bg-blue-400/20 text-blue-400 py-2 px-6 rounded-lg transition-all duration-300"
-            >
-              Manage Transactions
-            </a>
+                {years.map((y) => (
+                  <option key={y} value={y}>{y}</option>
+                ))}
+              </select>
+            </div>
           </div>
-        </motion.div>
-      </div>
+          
+          <button
+            onClick={fetchAdvice}
+            disabled={loading}
+            className="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 disabled:opacity-50 flex items-center justify-center gap-2 shadow-lg hover:shadow-blue-500/20"
+          >
+            {loading ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Analyzing...
+              </>
+            ) : (
+              <>
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
+                </svg>
+                Generate Insights
+              </>
+            )}
+          </button>
+        </div>
 
-      {/* Custom CSS for loading animation */}
-      <style>{`
-        @keyframes loading {
-          0% { width: 0%; }
-          50% { width: 100%; }
-          100% { width: 0%; }
-        }
-      `}</style>
+        {error && (
+          <div className="bg-red-900/80 text-red-100 p-4 rounded-lg mb-6 border border-red-700 animate-shake">
+            <div className="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              {error}
+            </div>
+          </div>
+        )}
+
+        {advice && (
+          <div className="bg-gray-800 rounded-xl shadow-2xl p-6 border border-gray-700 animate-fade-in">
+            <h2 className="text-2xl font-semibold mb-4 text-blue-400 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
+              Your Financial Report for {months.find(m => m.value === month)?.name} {year}
+            </h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+                <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                  Expert Advice
+                </h3>
+                <p className="text-gray-200 leading-relaxed">{advice.advice}</p>
+              </div>
+              
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+                <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z" />
+                  </svg>
+                  Focus Area
+                </h3>
+                <p className="text-gray-200 leading-relaxed">{advice.focusArea}</p>
+              </div>
+              
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+                <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd" />
+                  </svg>
+                  Savings Goal
+                </h3>
+                <p className="text-2xl font-bold text-blue-300">{advice.savingsGoal}</p>
+                <p className="text-gray-400 text-sm mt-1">Potential monthly savings</p>
+              </div>
+              
+              <div className="bg-gray-700/50 p-5 rounded-lg border border-gray-600 hover:border-blue-500 transition-all">
+                <h3 className="text-lg font-medium mb-3 text-blue-400 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M12 7a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0V8.414l-4.293 4.293a1 1 0 01-1.414 0L8 10.414l-4.293 4.293a1 1 0 01-1.414-1.414l5-5a1 1 0 011.414 0L11 10.586 14.586 7H12z" clipRule="evenodd" />
+                  </svg>
+                  Recommended Reduction
+                </h3>
+                <div className="flex items-center gap-4">
+                  <div className="w-full bg-gray-600 rounded-full h-3">
+                    <div 
+                      className="bg-gradient-to-r from-blue-500 to-blue-400 h-3 rounded-full transition-all duration-1000 ease-out" 
+                      style={{ width: `${advice.reductionPercentage}%` }}
+                    ></div>
+                  </div>
+                  <span className="text-xl font-bold text-blue-300 whitespace-nowrap">
+                    {advice.reductionPercentage}%
+                  </span>
+                </div>
+                <p className="text-gray-400 text-sm mt-2">Target reduction for {advice.focusArea}</p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

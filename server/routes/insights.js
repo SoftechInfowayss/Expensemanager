@@ -14,69 +14,109 @@ if (!process.env.GEMINI_API_KEY) {
 
 router.get('/advice', async (req, res) => {
   try {
-    const { email } = req.query;
-
-    // Validate email parameter
-    if (!email) {
-      return res.status(400).json({ error: 'Email query parameter is required' });
-    }
-
-    // Fetch expense transactions for the user
-    const transactions = await Transaction.find({ email, type: 'expense' }).lean();
-    if (!transactions.length) {
-      return res.status(404).json({ error: 'No expense transactions found for this user' });
-    }
-
-    // Validate and prepare transaction data
-    const transactionDetails = transactions
-      .map(t => ({
-        name: t.name || 'Unknown',
-        amount: typeof t.amount === 'number' ? t.amount : 0,
-        date: t.date || new Date()
-      }))
-      .filter(t => t.amount > 0)
-      .sort((a, b) => b.amount - a.amount);
-
-    if (!transactionDetails.length) {
-      return res.status(404).json({ error: 'No valid expense transactions found for this user' });
-    }
-
-    const totalSpent = transactionDetails.reduce((sum, t) => sum + t.amount, 0);
-    console.log('Transaction Details:', transactionDetails);
-
-    // Prompt for Gemini API
-    const prompt = `
-      Based on the following financial data, provide personalized financial advice as a raw JSON object:
-      - Total spent: ₹${totalSpent.toFixed(2)}
-      - Transaction details: ${JSON.stringify(transactionDetails)}
-      Analyze the transaction names and amounts to identify spending patterns or frequent expenses.
-      Suggest ways to save money, including a specific percentage reduction for the highest spending transaction or pattern.
-      Return ONLY a raw JSON object (do NOT wrap in markdown, code blocks like \\\`json, or extra text) with these exact fields: 
-      {
-        "advice": "string", 
-        "savingsGoal": "string", 
-        "focusArea": "string", 
-        "reductionPercentage": number
-      }.
-      Example: 
-      {
-        "advice": "Reduce Uber rides by 20%", 
-        "savingsGoal": "₹10", 
-        "focusArea": "Uber rides", 
-        "reductionPercentage": 20
-      }
-      Important: Ensure the response is valid JSON with proper double quotes and no trailing commas.
-    `;
+    const { email, month, year } = req.query;
     
+    // Validate query parameters
+    if (!email) return res.status(400).json({ error: 'Email query parameter is required' });
+    if (!month || !year) return res.status(400).json({ error: 'Month and year query parameters are required' });
+    
+    // Validate month and year format
+    const monthNum = parseInt(month);
+    const yearNum = parseInt(year);
+    if (isNaN(monthNum)) return res.status(400).json({ error: 'Month must be a number' });
+    if (monthNum < 1 || monthNum > 12) return res.status(400).json({ error: 'Month must be between 1 and 12' });
+    if (isNaN(yearNum)) return res.status(400).json({ error: 'Year must be a number' });
+    if (yearNum < 2000 || yearNum > new Date().getFullYear() + 1) {
+      return res.status(400).json({ error: 'Year must be between 2000 and next year' });
+    }
+
+    // Calculate date range for the specified month
+    const startDate = new Date(yearNum, monthNum - 1, 1);
+    const endDate = new Date(yearNum, monthNum, 0, 23, 59, 59, 999);
+
+    // Fetch all transactions (income and expense) for the specified month
+    const transactions = await Transaction.find({
+      email,
+      date: {
+        $gte: startDate,
+        $lte: endDate
+      }
+    }).sort({ date: 1 }).lean();
+
+    if (!transactions.length) {
+      return res.status(404).json({ 
+        error: `No transactions found for ${email} in ${monthNum}/${yearNum}`,
+        suggestion: 'Try a different month or add transactions first'
+      });
+    }
+
+    // Process transactions
+    const categorizedExpenses = {};
+    let totalExpenses = 0;
+    const frequentExpenses = {};
+
+    transactions.forEach(tx => {
+      if (tx.type === 'expense') {
+        const amount = parseFloat(tx.amount) || 0;
+        if (amount > 0) {
+          const category = tx.category?.toLowerCase() || tx.name?.toLowerCase() || 'other';
+          categorizedExpenses[category] = (categorizedExpenses[category] || 0) + amount;
+          totalExpenses += amount;
+          
+          // Track frequent expenses
+          frequentExpenses[tx.name] = (frequentExpenses[tx.name] || 0) + 1;
+        }
+      }
+    });
+
+    // Get top expense categories
+    const topExpenses = Object.entries(categorizedExpenses)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3);
+
+    // Get most frequent expenses
+    const mostFrequent = Object.entries(frequentExpenses)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2);
+
+    // Prepare the prompt with transaction context
+    const prompt = `
+      Analyze this user's expense data for ${monthNum}/${yearNum} and provide specific financial advice.
+      Focus only on suggesting practical ways to reduce expenses with these exact 4 fields in JSON format:
+      - advice: A short actionable advice (1 sentence)
+      - savingsGoal: A specific savings target amount with currency symbol
+      - focusArea: The main category/expense to focus on
+      - reductionPercentage: A realistic percentage to reduce (5-30%)
+
+      Expense Data:
+      - Total Expenses: ₹${totalExpenses.toFixed(2)}
+      - Top Categories: ${topExpenses.map(([cat, amt]) => `${cat} (₹${amt.toFixed(2)})`).join(', ')}
+      - Frequent Expenses: ${mostFrequent.map(([name, count]) => `${name} (${count}x)`).join(', ')}
+
+      Response Requirements:
+      1. Return ONLY raw JSON with the 4 specified fields
+      2. No additional text or markdown
+      3. Use double quotes for all properties and strings
+      4. Example format:
+      {
+        "advice": "Reduce eating out by cooking more at home",
+        "savingsGoal": "₹2000",
+        "focusArea": "Restaurants",
+        "reductionPercentage": 15
+      }
+    `;
+
     const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
     const result = await model.generateContent(prompt);
-    let rawResponse = result.response.text().trim();
-    console.log('Raw Gemini Response:', rawResponse);
+    const rawResponse = result.response.text().trim();
 
-    // Improved response cleaning
+    // Parse and validate the response
     try {
-      // First try to parse directly in case it's already valid JSON
-      let advice = JSON.parse(rawResponse);
+      // Clean the response
+      let jsonString = rawResponse.replace(/```json|```/g, '').trim();
+      
+      // Parse the JSON
+      const advice = JSON.parse(jsonString);
       
       // Validate required fields
       const requiredFields = ['advice', 'savingsGoal', 'focusArea', 'reductionPercentage'];
@@ -85,54 +125,40 @@ router.get('/advice', async (req, res) => {
         throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
       }
 
-      // Validate reductionPercentage
-      if (typeof advice.reductionPercentage !== 'number' || isNaN(advice.reductionPercentage)) {
-        throw new Error('reductionPercentage must be a valid number');
+      // Validate reductionPercentage is a reasonable number
+      const percentage = parseInt(advice.reductionPercentage);
+      if (isNaN(percentage) || percentage < 5 || percentage > 30) {
+        advice.reductionPercentage = 10; // Default to 10% if invalid
       }
+
+      // Add month/year context (hidden in response but useful for debugging)
+      advice._context = {
+        month: monthNum,
+        year: yearNum,
+        totalExpenses
+      };
 
       return res.status(200).json(advice);
-    } catch (parseError) {
-      console.log('Initial parse failed, attempting to clean response...');
       
-      // If direct parse fails, try cleaning
-      try {
-        // Remove markdown code blocks if present
-        rawResponse = rawResponse.replace(/^(json)?|$/g, '').trim();
-        
-        // Fix common JSON issues
-        // 1. Replace single quotes with double quotes
-        rawResponse = rawResponse.replace(/'/g, '"');
-        // 2. Remove trailing commas
-        rawResponse = rawResponse.replace(/,\s*}/g, '}').replace(/,\s*]/g, ']');
-        // 3. Ensure keys are quoted
-        rawResponse = rawResponse.replace(/([{,]\s*)([a-zA-Z0-9_]+)(\s*:)/g, '$1"$2"$3');
-        
-        console.log('Cleaned response:', rawResponse);
-        
-        const advice = JSON.parse(rawResponse);
-        
-        // Validate the cleaned response
-        const requiredFields = ['advice', 'savingsGoal', 'focusArea', 'reductionPercentage'];
-        const missingFields = requiredFields.filter(field => !(field in advice));
-        if (missingFields.length) {
-          throw new Error(`Missing required fields: ${missingFields.join(', ')}`);
-        }
-
-        if (typeof advice.reductionPercentage !== 'number' || isNaN(advice.reductionPercentage)) {
-          throw new Error('reductionPercentage must be a valid number');
-        }
-
-        return res.status(200).json(advice);
-      } catch (cleanError) {
-        console.error('Failed to clean and parse response:', cleanError);
-        throw new Error(`Unable to parse Gemini response: ${cleanError.message}`);
-      }
+    } catch (parseError) {
+      console.error('Failed to parse Gemini response:', parseError);
+      console.error('Problematic response:', rawResponse);
+      
+      // Fallback response if parsing fails
+      return res.status(200).json({
+        advice: `Review your top expenses in ${topExpenses[0]?.[0] || 'main'} category for potential savings`,
+        savingsGoal: `₹${Math.round(totalExpenses * 0.1)}`,
+        focusArea: topExpenses[0]?.[0] || 'your main expenses',
+        reductionPercentage: 10,
+        _warning: 'Default advice generated due to AI parsing issues'
+      });
     }
+    
   } catch (error) {
-    console.error('Error generating financial advice:', error.message);
-    res.status(500).json({ 
-      error: 'Failed to generate financial advice', 
-      details: error.message 
+    console.error('Error in financial advice endpoint:', error);
+    res.status(500).json({
+      error: 'Failed to generate financial advice',
+      details: error.message
     });
   }
 });
