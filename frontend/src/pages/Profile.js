@@ -30,7 +30,7 @@ const Profile = () => {
     }, [userEmail]);
     const fetchProfile = async () => {
       try {
-          const res = await axios.get(`http://localhost:5000/api/auth/profile?email=${userEmail}`);
+          const res = await axios.get(`https://expensemanager-jite.onrender.com/api/auth/profile?email=${userEmail}`);
           const { name, email, phoneno, address, dob } = res.data;
           setName(name);
           setEmail(email);
@@ -54,7 +54,7 @@ const Profile = () => {
       }
   
       try {
-          const res = await axios.put(`https://expensebackend-production.up.railway.app/api/auth/profile`, {
+          const res = await axios.put(`https://expensemanager-jite.onrender.com/api/auth/profile`, {
               name,
               email: userEmail,
               phoneno,

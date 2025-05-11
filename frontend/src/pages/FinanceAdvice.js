@@ -31,7 +31,7 @@ const FinancialAdvice = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await axios.get('http://localhost:5000/api/insights/advice', {
+      const response = await axios.get('https://expensemanager-jite.onrender.com/api/insights/advice', {
         params: { email, month, year }
       });
       setAdvice(response.data);

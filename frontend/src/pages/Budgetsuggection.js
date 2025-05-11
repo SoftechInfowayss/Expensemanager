@@ -26,7 +26,7 @@ const BudgetSuggestion = () => {
         setLoading(true);
         const email = localStorage.getItem('email') || 'taruna123@gmail.com';
         const response = await fetch(
-          `http://localhost:5000/api/budget/suggestion?email=${email}&month=${month}&year=${year}`
+          `https://expensemanager-jite.onrender.com/api/budget/suggestion?email=${email}&month=${month}&year=${year}`
         );
         
         if (!response.ok) {

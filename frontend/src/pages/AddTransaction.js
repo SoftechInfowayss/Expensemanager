@@ -35,7 +35,7 @@ const AddTransactionPage = () => {
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/transactions/", {
+      const response = await axios.post("https://expensemanager-jite.onrender.com/", {
         email,
         name,
         amount: parseFloat(amount),

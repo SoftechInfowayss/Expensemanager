@@ -24,7 +24,7 @@ const ContactUs = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/contact", formData);
+      const response = await axios.post("https://expensemanager-jite.onrender.com/api/auth/contact", formData);
       toast.success(response.data.message || "Message sent successfully!");
       setFormData({ name: "", email: "", message: "" });
     } catch (error) {
