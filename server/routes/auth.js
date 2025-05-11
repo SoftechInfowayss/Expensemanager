@@ -39,7 +39,7 @@ router.post("/contact", async (req, res) => {
     const adminMailOptions = {
       from: process.env.EMAIL_USER,
       to: process.env.EMAIL_USER, // Sending to yourself
-      subject: `New Contact Form Submission from ${name}`,
+      subject: `New Contact Form Submission From ${name}`,
       text: `You have received a new contact form submission:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}`,
     };
 
