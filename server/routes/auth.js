@@ -18,30 +18,39 @@ router.post("/contact", async (req, res) => {
     const contact = new Contact({ name, email, message });
     await contact.save();
 
-    // Configure Nodemailer transporter
+    // Configure Nodemailer transporter using environment variables
     const transporter = nodemailer.createTransport({
       service: "gmail",
       auth: {
-        user: "simarnarula1477@gmail.com", // Your email
-        pass: "aoxk kndj ywqp jzcb", // Your email password or app password
+        user: process.env.EMAIL_USER, // Your email from environment variables
+        pass: process.env.EMAIL_PASSWORD, // Your email password or app password from environment variables
       },
     });
 
-    // Email options
-    const mailOptions = {
-      from: "simarnarula1477@gmail.com",
+    // Email to customer
+    const customerMailOptions = {
+      from: process.env.EMAIL_USER,
       to: email,
       subject: "Thank You for Contacting Us!",
       text: `Dear ${name},\n\nThank you for contacting us. Your message was: "${message}".\nWe will get back to you shortly.\n\nBest Regards,\nYour Team`,
     };
 
-    // Send email
-    await transporter.sendMail(mailOptions);
+    // Email to yourself (admin)
+    const adminMailOptions = {
+      from: process.env.EMAIL_USER,
+      to: process.env.EMAIL_USER, // Sending to yourself
+      subject: `New Contact Form Submission from ${name}`,
+      text: `You have received a new contact form submission:\n\nName: ${name}\nEmail: ${email}\nMessage: ${message}`,
+    };
+
+    // Send both emails
+    await transporter.sendMail(customerMailOptions);
+    await transporter.sendMail(adminMailOptions);
 
     return res.status(200).json({ message: "Message sent successfully" });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: "Error sending message", error });
+    return res.status(500).json({ message: "Error sending message", error: error.message });
   }
 });
 
