@@ -232,7 +232,7 @@ const ContactUs = () => {
       </section>
 
       {/* Google Map */}
-      <section className="max-w-7xl mx-auto p-6">
+      {/* <section className="max-w-7xl mx-auto p-6">
         <motion.div
           whileHover={{ scale: 1.02 }}
           className="overflow-hidden rounded-lg shadow-lg border border-blue-500"
@@ -245,7 +245,7 @@ const ContactUs = () => {
             loading="lazy"
           ></iframe>
         </motion.div>
-      </section>
+      </section> */}
 
       <Footer />
     </div>

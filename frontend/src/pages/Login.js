@@ -92,29 +92,29 @@ const Login = () => {
 
   return (
     <>
-      <div className={`flex min-h-screen transition-all duration-1000 ease-out ${loaded ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
+      <div className={`flex min-h-screen flex-col lg:flex-row transition-all duration-1000 ease-out ${loaded ? "opacity-100 scale-100" : "opacity-0 scale-95"}`}>
         {/* Left Side - Animated Background with Floating Overlay Text */}
         <div
-          className="relative w-1/2 hidden lg:flex items-center justify-center bg-cover bg-center transition-all duration-1000 ease-in-out transform hover:scale-105"
+          className="relative w-full lg:w-1/2 flex items-center justify-center bg-cover bg-center transition-all duration-1000 ease-in-out transform hover:scale-105 min-h-[50vh] lg:min-h-screen"
           style={{
             backgroundImage: "url('https://media.istockphoto.com/id/1335717953/photo/project-manager-working-on-computer-at-the-office-concept-with-icons-of-management-areas-such.jpg?s=612x612&w=0&k=20&c=HKKel0F9p7u9JL54sDOtYOuR1yVv81LA2ISHmuU7mdM=')",
           }}
         >
           <div className="absolute inset-0 bg-black bg-opacity-60"></div> {/* Dark Overlay */}
-          <div className="relative text-white px-10 text-center">
-            <h1 className="text-5xl font-extrabold leading-tight animate-float hover:animate-glow transition-all duration-700">
+          <div className="relative text-white px-6 lg:px-10 text-center">
+            <h1 className="text-4xl lg:text-5xl font-extrabold leading-tight animate-float hover:animate-glow transition-all duration-700">
               Take Control of <span className="text-indigo-400 animate-pulse">Your Finances</span>
             </h1>
-            <p className="mt-4 text-lg opacity-90 animate-slide-in hover:text-indigo-300 transition-all duration-700 hover:scale-105">
+            <p className="mt-4 text-base lg:text-lg opacity-90 animate-slide-in hover:text-indigo-300 transition-all duration-700 hover:scale-105">
               Secure. Fast. Reliable.
             </p>
           </div>
         </div>
 
         {/* Right Side - Animated Login Form */}
-        <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-900 px-8 pt-20">
-          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg shadow-lg p-10 w-full max-w-md border border-gray-700 transform transition-all duration-700 ease-in-out hover:scale-[1.05] hover:shadow-indigo-500/50">
-            <h2 className="text-4xl font-semibold text-center mb-6 text-white animate-slide-up">Login</h2>
+        <div className="w-full lg:w-1/2 flex items-center justify-center bg-gray-900 px-4 lg:px-8 py-10 lg:pt-20">
+          <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-lg shadow-lg p-8 lg:p-10 w-full max-w-md border border-gray-700 transform transition-all duration-700 ease-in-out hover:scale-[1.05] hover:shadow-indigo-500/50">
+            <h2 className="text-3xl lg:text-4xl font-semibold text-center mb-6 text-white animate-slide-up">Login</h2>
 
             {/* Feature Icons - Smooth Floating */}
             <div className="flex justify-center space-x-6 mb-6">
