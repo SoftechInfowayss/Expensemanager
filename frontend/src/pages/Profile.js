@@ -24,58 +24,58 @@ const Profile = () => {
             return;
         }
 
-       
-
         fetchProfile();
     }, [userEmail]);
+
     const fetchProfile = async () => {
-      try {
-          const res = await axios.get(`https://expensemanager-jite.onrender.com/api/auth/profile?email=${userEmail}`);
-          const { name, email, phoneno, address, dob } = res.data;
-          setName(name);
-          setEmail(email);
-          setPhoneno(phoneno || "");
-          setAddress(address || "");
-          setDob(dob || "");
-          setLoading(false);
-      } catch (err) {
-          console.error(err);
-          setError("Failed to fetch profile data.");
-          setLoading(false);
-      }
-  };
+        try {
+            const res = await axios.get(`https://expensemanager-jite.onrender.com/api/auth/profile?email=${userEmail}`);
+            const { name, email, phoneno, address, dob } = res.data;
+            setName(name);
+            setEmail(email);
+            setPhoneno(phoneno || "");
+            setAddress(address || "");
+            // Ensure dob is stored as date-only if it includes time
+            setDob(dob ? new Date(dob).toISOString().split('T')[0] : "");
+            setLoading(false);
+        } catch (err) {
+            console.error(err);
+            setError("Failed to fetch profile data.");
+            setLoading(false);
+        }
+    };
 
     // Handle profile update
     const handleUpdateProfile = async (e) => {
-      e.preventDefault();
-      if (!userEmail) {
-          alert("User email not found. Please log in again.");
-          return;
-      }
-  
-      try {
-          const res = await axios.put(`https://expensemanager-jite.onrender.com/api/auth/profile`, {
-              name,
-              email: userEmail,
-              phoneno,
-              address,
-              dob,
-          });
-          
-          // Update all states from the response
-          setName(res.data.name);
-          setPhoneno(res.data.phoneno || "");
-          setAddress(res.data.address || "");
-          setDob(res.data.dob || "");
-          
-          alert("Profile updated successfully!");
-          fetchProfile();
-          setIsEditing(false);
-      } catch (err) {
-          console.error(err);
-          alert("Failed to update profile.");
-      }
-  };
+        e.preventDefault();
+        if (!userEmail) {
+            alert("User email not found. Please log in again.");
+            return;
+        }
+
+        try {
+            const res = await axios.put(`https://expensemanager-jite.onrender.com/api/auth/profile`, {
+                name,
+                email: userEmail,
+                phoneno,
+                address,
+                dob,
+            });
+            
+            // Update all states from the response
+            setName(res.data.name);
+            setPhoneno(res.data.phoneno || "");
+            setAddress(res.data.address || "");
+            setDob(res.data.dob ? new Date(res.data.dob).toISOString().split('T')[0] : "");
+            
+            alert("Profile updated successfully!");
+            fetchProfile();
+            setIsEditing(false);
+        } catch (err) {
+            console.error(err);
+            alert("Failed to update profile.");
+        }
+    };
 
     // Handle change password
     const handleChangePassword = async (e) => {
@@ -90,7 +90,7 @@ const Profile = () => {
                 <motion.div
                     initial={{ opacity: 0, scale: 0.8 }}
                     animate={{ opacity: 1, scale: 1 }}
-                    transition={{ duration: 0.5 }}
+                    transition={{ کduration: 0.5 }}
                 >
                     Loading...
                 </motion.div>
@@ -112,6 +112,13 @@ const Profile = () => {
             </div>
         );
     }
+
+    // Format DOB for display (e.g., MM/DD/YYYY)
+    const formatDob = (dob) => {
+        if (!dob) return "Not provided";
+        const date = new Date(dob);
+        return `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`;
+    };
 
     return (
         <div className="p-6 bg-gray-900 min-h-screen text-white pt-24">
@@ -140,21 +147,20 @@ const Profile = () => {
                         <p className="text-gray-400">{email}</p>
                     </div>
 
-                   
-<div className="mt-6 space-y-4">
-    <div className="flex items-center">
-        <FaPhone className="text-blue-400 mr-2" />
-        <span>{phoneno ? phoneno : "Not provided"}</span>
-    </div>
-    <div className="flex items-center">
-        <FaMapMarkerAlt className="text-blue-400 mr-2" />
-        <span>{address ? address : "Not provided"}</span>
-    </div>
-    <div className="flex items-center">
-        <FaBirthdayCake className="text-blue-400 mr-2" />
-        <span>{dob ? dob : "Not provided"}</span>
-    </div>
-</div>
+                    <div className="mt-6 space-y-4">
+                        <div className="flex items-center">
+                            <FaPhone className="text-blue-400 mr-2" />
+                            <span>{phoneno ? phoneno : "Not provided"}</span>
+                        </div>
+                        <div className="flex items-center">
+                            <FaMapMarkerAlt className="text-blue-400 mr-2" />
+                            <span>{address ? address : "Not provided"}</span>
+                        </div>
+                        <div className="flex items-center">
+                            <FaBirthdayCake className="text-blue-400 mr-2" />
+                            <span>{formatDob(dob)}</span>
+                        </div>
+                    </div>
 
                     <div className="mt-6 space-y-4">
                         <button
@@ -192,7 +198,7 @@ const Profile = () => {
                             </p>
                         </div>
                         <div className="p-4 bg-gray-700 rounded-lg">
-                            <h4 className="font-semibold">Support</h4>
+                            <h4 className="font-semibold">Support Equality</h4>
                             <p className="text-sm text-gray-400">
                                 Need help? Contact our support team at <span className="text-blue-400">support@example.com</span>.
                             </p>
