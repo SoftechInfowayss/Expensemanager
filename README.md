@@ -25,7 +25,7 @@
 </p>
 
 <p align="center">
-  <img src="images/login.jpg" alt="Login Page" width="60%" />
+  <img src="images/login.jpg" alt="Login Page" width="80%" />
   <br />
   <em>🔐 Login Page – Secure authentication screen</em>
 </p>
@@ -37,7 +37,7 @@
 </p>
 
 <p align="center">
-  <img src="images/addtransaction.jpg" alt="Add Transaction" width="70%" />
+  <img src="images/addtransaction.jpg" alt="Add Transaction" width="80%" />
   <br />
   <em>➕ Add Transaction – Log new expenses with categories and notes</em>
 </p>
