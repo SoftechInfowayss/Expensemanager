@@ -64,7 +64,7 @@
 | **Backend**     | Node.js, Next.js API routes                                                  |
 | **Database**    | MongoDB (or your actual DB)                                                  |
 | **State**       | React Context API                                                            |
-| **Deployment**  | Vercel                                                                       |
+| **Deployment**  | Netlify                                                                      |
 | **Testing**     | Jest, React Testing Library                                                  |
 
 ---
