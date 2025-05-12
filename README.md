@@ -1,7 +1,7 @@
 # 💰 ExpenseEase - Modern Expense Management App
 
 ## 🌐 Live Website  
-👉 [https://expensemanager-eight.vercel.app/](https://expensemanager-eight.vercel.app/)
+👉 [https://stexpenseease.netlify.app/](https://stexpenseease.netlify.app/)
 
 ---
 
@@ -80,7 +80,7 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/tarunaaaa/expenseease.git
+git clone https://github.com/SoftechInfowayss/Expensemanager
 
 # Navigate to project directory
 cd expenseease
