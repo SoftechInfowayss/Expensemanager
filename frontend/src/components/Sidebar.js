@@ -1,11 +1,18 @@
 import { NavLink } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import './Sidebar.css';
+import { useContext } from "react";  // Add this import
+import AuthContext from "../context/AuthContext";  // Add this import
 
 // SVG Icons (Heroicons-inspired)
 const DashboardIcon = () => (
   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+  </svg>
+);
+const LogoutIcon = () => (
+  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
   </svg>
 );
 
@@ -34,11 +41,15 @@ const BudgetSuggestionIcon = () => (
 );
 
 const Sidebar = ({ isOpen, toggleSidebar }) => {
+   const { logout } = useContext(AuthContext); 
   const closeSidebar = () => {
     console.log("Sidebar close called");
     toggleSidebar();
   };
-
+  const handleLogout = () => {
+    logout();
+    closeSidebar();  // Close sidebar after logout
+  };
   // Animation variants for sidebar
   const sidebarVariants = {
     open: {
@@ -61,7 +72,7 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
     }),
   };
 
-  return (
+ return (
     <>
       <AnimatePresence>
         {isOpen && (
@@ -117,6 +128,23 @@ const Sidebar = ({ isOpen, toggleSidebar }) => {
               </NavLink>
             </motion.li>
           ))}
+
+          {/* Add Logout Button */}
+          <motion.li
+            className="mb-4 mt-8"  // Added mt-8 for top margin
+            custom={5}  // Next index after the last menu item
+            variants={linkVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <button
+              onClick={handleLogout}
+              className="sidebar-link w-full text-left"  // Use same styling as other links
+            >
+              <LogoutIcon />
+              <span>Logout</span>
+            </button>
+          </motion.li>
         </ul>
       </motion.div>
     </>

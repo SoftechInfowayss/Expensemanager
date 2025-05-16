@@ -5,6 +5,8 @@ import Footer from "../components/Footer";
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from "react";
+import AuthContext from "../context/AuthContext";
 
 const LoginSuccessPopup = ({ onClose }) => {
   return (
@@ -44,6 +46,7 @@ const LoginSuccessPopup = ({ onClose }) => {
 };
 
 const Login = () => {
+    const { login } = useContext(AuthContext);
   const [loaded, setLoaded] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -57,38 +60,49 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await axios.post('https://expensemanager-jite.onrender.com/api/auth/login', {
-        email,
-        password
-      });
+        const response = await axios.post('https://expensemanager-jite.onrender.com/api/auth/login', {
+            email,
+            password
+        });
 
-      // Store email in localStorage
-      localStorage.setItem("email", email);
+        // Store email in localStorage
+        localStorage.setItem("email", email);
+        
+        // Store the token if your API returns one
+        if (response.data.token) {
+            localStorage.setItem('token', response.data.token);
+        }
 
-      console.log('Login successful:', response.data);
-      
-      // Show success popup
-      setShowSuccessPopup(true);
-      
-      // Redirect after 3 seconds
-      setTimeout(() => {
-        navigate('/user');
-      }, 3000);
-
+        console.log('Login successful:', response.data);
+        
+        // Use the login function from context instead of setUser
+        login({
+            email: email,
+            name: response.data.name || email.split('@')[0], // Use name from response or email prefix
+            token: response.data.token // Include token if available
+        });
+        
+        // Show success popup
+        setShowSuccessPopup(true);
+        
+        // Redirect after 3 seconds
+        setTimeout(() => {
+            navigate('/user');
+        }, 3000);
     } catch (error) {
-      const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
-      toast.error(errorMessage, {
-        position: "top-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+        const errorMessage = error.response?.data?.message || "Login failed. Please try again.";
+        toast.error(errorMessage, {
+            position: "top-right",
+            autoClose: 3000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+        });
 
-      console.error('Login failed:', error.response ? error.response.data : error.message);
+        console.error('Login failed:', error.response ? error.response.data : error.message);
     }
-  };
+};
 
   return (
     <>

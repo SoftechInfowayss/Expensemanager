@@ -22,8 +22,8 @@ const App = () => {
     };
 
     return (
-        <AuthProvider>
-            <Router>
+        <Router>
+            <AuthProvider>
                 <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <Routes>
                     <Route path="/" element={<Home />} />
@@ -39,11 +39,9 @@ const App = () => {
                         path="/user/*"
                         element={<User isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}
                     />
-                    
                 </Routes>
-            </Router>
-        </AuthProvider>
-        
+            </AuthProvider>
+        </Router>
     );
 };
 
