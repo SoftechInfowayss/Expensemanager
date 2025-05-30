@@ -4,34 +4,41 @@ import { useNavigate } from "react-router-dom";
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-    // Initialize state with user data from localStorage if available
+    // Initialize state with user data from sessionStorage if available
     const [user, setUser] = useState(() => {
-        const storedUser = localStorage.getItem('user');
-        return storedUser ? JSON.parse(storedUser) : null;
+        const storedEmail = sessionStorage.getItem('email');
+        const storedToken = sessionStorage.getItem('token');
+        return storedEmail && storedToken ? { name: storedEmail } : null;
     });
 
     const navigate = useNavigate();
 
-    // Persist user data to localStorage whenever it changes
+    // Persist user data to sessionStorage whenever it changes
     useEffect(() => {
         if (user) {
-            localStorage.setItem('user', JSON.stringify(user));
+            sessionStorage.setItem('email', user.name);
+            // Note: Token is typically set during login, not here, unless user object includes it
         } else {
-            localStorage.removeItem('user');
+            sessionStorage.removeItem('email');
+            sessionStorage.removeItem('token');
         }
     }, [user]);
 
     // Login function to be used by components
-    const login = (userData) => {
-        setUser(userData);
+    const login = (userData, token) => {
+        // userData should include at least { name: email }
+        // token is the authentication token from your backend
+        setUser({ name: userData.name });
+        sessionStorage.setItem('email', userData.name);
+        sessionStorage.setItem('token', token);
     };
 
     // Logout function to clear user data and navigate to home page
     const logout = () => {
         setUser(null);
-        localStorage.removeItem('user');
+        sessionStorage.removeItem('email');
+        sessionStorage.removeItem('token');
         navigate('/'); // Navigate to home page
-        // Add any other cleanup here (e.g., clearing tokens)
     };
 
     // Value provided to consumers

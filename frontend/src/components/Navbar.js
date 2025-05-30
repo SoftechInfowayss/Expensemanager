@@ -26,8 +26,8 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
 const handleLogout = () => {
     setUser(null);
     setDropdownOpen(false);
-    localStorage.removeItem('token'); // Clear any stored token
-    localStorage.removeItem('email'); // Clear stored email
+    sessionStorage.removeItem('token'); // Clear any stored token
+    sessionStorage.removeItem('email'); // Clear stored email
     navigate('/'); // Redirect to home page
 };
 

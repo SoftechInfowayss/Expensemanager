@@ -66,11 +66,11 @@ const Login = () => {
         });
 
         // Store email in localStorage
-        localStorage.setItem("email", email);
+         sessionStorage.setItem("email", email);
         
         // Store the token if your API returns one
         if (response.data.token) {
-            localStorage.setItem('token', response.data.token);
+            sessionStorage.setItem('token', response.data.token);
         }
 
         console.log('Login successful:', response.data);
