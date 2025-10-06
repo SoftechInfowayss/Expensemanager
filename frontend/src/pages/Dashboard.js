@@ -23,11 +23,11 @@ const Dashboard = () => {
 
     const fetchData = async () => {
       try {
-        const res = await axios.get(`https://expensemanager-jite.onrender.com/api/transactions?email=${email}`);
+        const res = await axios.get(`http://localhost:5000/api/transactions?email=${email}`);
         setTransactions(res.data);
         calculateStats(res.data);
 
-        const monthlyRes = await axios.get(`https://expensemanager-jite.onrender.com/api/transactions/summary/monthly?email=${email}`);
+        const monthlyRes = await axios.get(`http://localhost:5000/api/transactions/summary/monthly?email=${email}`);
         setMonthlyData(monthlyRes.data);
       } catch (err) {
         console.error(err);
@@ -40,7 +40,7 @@ const Dashboard = () => {
   const getFinancialAdvice = async () => {
     setLoadingAdvice(true);
     try {
-      const response = await axios.get(`https://expensemanager-jite.onrender.com/api/insights/advice?email=${email}`);
+      const response = await axios.get(`http://localhost:5000/api/insights/advice?email=${email}`);
       setAdvice(response.data);
       setShowAdvice(true);
     } catch (error) {

@@ -60,17 +60,17 @@ const Login = () => {
 
   const handleLogin = async () => {
     try {
-        const response = await axios.post('https://expensemanager-jite.onrender.com/api/auth/login', {
+        const response = await axios.post('http://localhost:5000/api/auth/login', {
             email,
             password
         });
 
         // Store email in localStorage
-         sessionStorage.setItem("email", email);
+         localStorage.setItem("email", email);
         
         // Store the token if your API returns one
         if (response.data.token) {
-            sessionStorage.setItem('token', response.data.token);
+           localStorage.setItem('token', response.data.token);
         }
 
         console.log('Login successful:', response.data);
