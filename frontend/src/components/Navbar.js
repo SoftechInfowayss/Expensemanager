@@ -2,7 +2,9 @@ import { useState, useContext, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { LucideUser, LucideMenu, LucideX, LucideInfo, LucideMail, LucideAlignLeft, LucideShield } from "lucide-react";
-import AuthContext from "../context/AuthContext";
+ // Add this import
+import AuthContext from "../context/AuthContext";  // Add this import
+
 
 const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
     const [menuOpen, setMenuOpen] = useState(false);
@@ -21,15 +23,18 @@ const Navbar = ({ isSidebarOpen, toggleSidebar }) => {
     const handleToggleMenu = () => {
         setMenuOpen((prev) => !prev);
     };
-
-    const handleLogout = () => {
-        setUser(null);
-        setDropdownOpen(false);
-    };
+const handleLogout = () => {
+    setUser(null);
+    setDropdownOpen(false);
+    sessionStorage.removeItem('token'); // Clear any stored token
+    sessionStorage.removeItem('email'); // Clear stored email
+    navigate('/'); // Redirect to home page
+};
 
     const handleAdminAccess = () => {
         navigate("/adminlogin"); // Navigate to the Admin Login Page
     };
+    
 
     return (
         <nav className="fixed w-full z-50 bg-gray-900 shadow-lg border-b border-gray-700">

@@ -3,6 +3,10 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 
+// ✅ Swagger Imports
+const swaggerJsDoc = require('swagger-jsdoc');
+const swaggerUi = require('swagger-ui-express');
+
 // Import Routes
 const authRoutes = require('./routes/auth');
 const transactionRoutes = require('./routes/transactionroutes');
@@ -19,6 +23,27 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// ✅ Swagger Configuration
+const swaggerOptions = {
+  definition: {
+    openapi: '3.0.0',
+    info: {
+      title: 'Expense Tracker API',
+      version: '1.0.0',
+      description: 'API documentation for Expense Tracker',
+    },
+    servers: [
+      {
+        url: 'http://localhost:5000',
+      },
+    ],
+  },
+  apis: ['./routes/*.js'], // ✅ Path to your route files
+};
+
+const swaggerDocs = swaggerJsDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+
 // Database Connection
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -33,6 +58,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/insights', insightRoutes);
 app.use('/api/budget', budgetRoutes); // ✅ Route added here
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // Basic Error Handling Middleware
 app.use((err, req, res, next) => {

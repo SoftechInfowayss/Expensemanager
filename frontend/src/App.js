@@ -13,6 +13,8 @@ import Profile from "./pages/Profile";
 import User from "./pages/User";
 import AdminLogin from "./pages/AdminLogin";
 import Figma from "./pages/Figma";
+import Loginp from "./components/Loginp";
+import Signup1 from "./components/Sign";
 
 const App = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -22,8 +24,11 @@ const App = () => {
     };
 
     return (
-        <AuthProvider>
-            <Router>
+        
+      
+        <>
+        <Router>
+            <AuthProvider>
                 <Navbar isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
                 <Routes>
                     <Route path="/" element={<Home />} />
@@ -39,11 +44,10 @@ const App = () => {
                         path="/user/*"
                         element={<User isSidebarOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />}
                     />
-                    
                 </Routes>
-            </Router>
-        </AuthProvider>
-        
+            </AuthProvider>
+        </Router>
+        </>
     );
 };
 
