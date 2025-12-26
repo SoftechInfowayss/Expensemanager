@@ -58,6 +58,9 @@ app.use('/api/auth', authRoutes);
 app.use('/api/transactions', transactionRoutes);
 app.use('/api/insights', insightRoutes);
 app.use('/api/budget', budgetRoutes); // ✅ Route added here
+app.get("/health", (req, res) => {
+  res.status(200).send("OK");
+});
 
 // Basic Error Handling Middleware
 app.use((err, req, res, next) => {
