@@ -24,7 +24,7 @@ const BudgetSuggestion = () => {
     const fetchBudgetSuggestions = async () => {
       try {
         setLoading(true);
-        const email = localStorage.getItem('email') || 'taruna123@gmail.com';
+        const email = localStorage.getItem('email') ;
         const response = await fetch(
           `http://localhost:5000/api/budget/suggestion?email=${email}&month=${month}&year=${year}`
         );

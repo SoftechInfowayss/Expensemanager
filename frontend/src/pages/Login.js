@@ -163,10 +163,8 @@ const Login = () => {
               className="w-full p-3 mb-3 bg-gray-800 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-400 transition-all duration-300 hover:ring-2 hover:ring-gray-500 animate-glow"
             />
 
-            {/* Forgot Password */}
-            <div className="text-sm text-center text-gray-400 hover:text-indigo-400 transition hover:animate-pulse">
-              <a href="#">Forgot password?</a>
-            </div>
+            
+           
 
             {/* Login Button - **ULTIMATE BUTTON ANIMATION!** */}
             <button 
